@@ -11,14 +11,18 @@ configure_file(${PROJECT_SOURCE_DIR}/include/config.h.in ${PROJECT_SOURCE_DIR}/i
 include_directories(include)
 file(GLOB SOURCES "src/*.cpp")
 
-add_subdirectory(POLARIS)
-add_subdirectory(FRACTAL)
-list(APPEND EXTRA_LIBS POLARIS)
-list(APPEND EXTRA_LIBS FRACTAL)
+
+#add_subdirectory(FRACTAL)
+#add_subdirectory(lua-5.4.4)
+#list(APPEND EXTRA_LIBS FRACTAL)
+#list(APPEND EXTRA_LIBS lua::lib)
+add_subdirectory(libs/lua-5.4.4)
 
 add_executable(MU ${SOURCES})
 
-target_link_libraries(MU PUBLIC ${EXTRA_LIBS})
+#target_link_libraries(MU PUBLIC ${EXTRA_LIBS})
+#target_link_libraries(MU PUBLIC lua-5.4.4)
+target_link_libraries(MU PUBLIC LuaLib )
 
 target_include_directories(MU PUBLIC "${PROJECT_BINARY_DIR}/include")
 

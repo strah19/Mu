@@ -1,0 +1,6 @@
+[submodule "libs/external/lugit"]
+	path = libs/external/lugit
+	url = https://github.com/lubgr/lua-cmake
+[submodule "libs/external/lua"]
+	path = libs/external/lua
+	url = https://github.com/lubgr/lua-cmake
