@@ -1,0 +1,84 @@
+#include <iostream>
+#include "fractal.h"
+
+extern "C" {
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
+}
+
+int multiplication(lua_State *L) {
+    int a = luaL_checkinteger(L, 1);
+    int b = luaL_checkinteger(L, 2);
+    lua_Integer c = a * b;
+    lua_pushinteger(L, c);
+    return 1;
+}
+
+int main() {
+  //  std::cout << "Hello Mu" << std::endl;
+    Fractal::test();
+
+   // std::string cmd = "a = 7 + 11";
+
+    lua_State *L = luaL_newstate();
+    luaL_openlibs(L);
+/*
+    int error = luaL_dostring(L, cmd.c_str());
+    if (error == LUA_OK) {
+        lua_getglobal(L, "a");
+        if (lua_isnumber(L, -1)) {
+            float a_cpp  = (float) lua_tonumber(L, -1);
+            std::cout << "a: " << a_cpp << std::endl;
+        }
+    }
+    else {
+        std::string error_msg = lua_tostring(L, -1);
+        std::cout << error_msg << std::endl;
+    }
+
+    std::string code = "print('Hello, World')";
+
+    if (luaL_loadstring(L, code.c_str()) == LUA_OK) {
+        if (lua_pcall(L, 0, 0, 0) == LUA_OK) {
+            lua_pop(L, lua_gettop(L));
+        }
+    }
+
+    lua_pushinteger(L, 42);
+    lua_setglobal(L, "answer");
+
+    code = "print(answer)";
+
+    if (luaL_dostring(L, code.c_str()) == LUA_OK) {
+        lua_pop(L, lua_gettop(L));
+    }
+    */
+
+ const struct luaL_Reg MyMathLib[] = {
+        { "mul", multiplication }
+    };
+
+    // We create a new table
+    lua_newtable(L);
+
+    // Here we set all functions from MyMathLib array into
+    // the table on the top of the stack
+    luaL_setfuncs(L, MyMathLib, 0);
+
+    // We get the table and set as global variable
+    lua_setglobal(L, "Mu");
+
+    // Now we can call from Lua using the namespace MyMath
+    char * code = "print(Mu.mul(7, 8))\n";
+
+    if (luaL_dostring(L, code) == LUA_OK) {
+        lua_pop(L, lua_gettop(L));
+    }
+
+
+
+    lua_close(L);
+
+    return 0;
+}
