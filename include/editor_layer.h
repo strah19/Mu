@@ -7,6 +7,8 @@ namespace Mu {
     class EditorLayer : public Layer {
     public:
         EditorLayer() : Layer("Editor Layer") { }
+
+        void UpdateGui();
     };
 }
 

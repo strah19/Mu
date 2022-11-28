@@ -33,6 +33,7 @@ namespace Mu {
         void OnEvent(Event& event);
     private:
         static Application* m_instance;
+        float lastframe_time = 0.0f;
 		friend int ::main(int argc, char** argv);
     };
 

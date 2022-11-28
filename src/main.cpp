@@ -1,4 +1,5 @@
 #include "editor_layer.h"
+#include "entry_point.h"
 
 class Iota : public Mu::Application {
 public:
