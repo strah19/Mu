@@ -22,6 +22,7 @@ namespace Mu {
 
         static Application& Get() { return *m_instance; }
         Window* GetWindow() { return m_window; }
+        void Quit();
     protected:
         WindowProperties m_properties;
         Window* m_window = nullptr;

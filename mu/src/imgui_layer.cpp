@@ -51,6 +51,13 @@ namespace Mu {
 		colors[ImGuiCol_TitleBg] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
 		colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
 		colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+
+		colors[ImGuiCol_ResizeGrip] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
+		colors[ImGuiCol_ResizeGripActive] = ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
+		colors[ImGuiCol_ResizeGripHovered] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+
+		colors[ImGuiCol_SliderGrab] = ImVec4{ 0.16f, 0.16f, 0.16f, 1.0f };
+		colors[ImGuiCol_SliderGrabActive] = ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
 		
 		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow()->GetNativeWindow());
 

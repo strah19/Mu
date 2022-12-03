@@ -1,48 +1,62 @@
 #include "editor_layer.h"
-#include "imgui.h"
-#include <cmath>
-static float Sin(void*, int i) { return sinf(i * 0.1f); }
+#include "application.h"
 
-namespace Mu {
+static int MyResizeCallback(ImGuiInputTextCallbackData* data) {
+    if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
+        ImVector<char>* my_str = (ImVector<char>*)data->UserData;
+        IM_ASSERT(my_str->begin() == data->Buf);
+        my_str->resize(data->BufSize); 
+        data->Buf = my_str->begin();
+    }
+    return 0;
+}
+
+#define MAX_FILENAME_LEN 256
+
+namespace Iota {
     void EditorLayer::UpdateGui() {
-        static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+        ImGui::Begin("Editor");
 
-        ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+        if (ImGui::BeginTabBar("editor tab")) {
+            for (int i = 0; i < in_editor_files.size(); i++) {
+                if (i == in_editor_files.size() - 1 && creating_new_file)
+                    break;
 
-        ImGuiViewport* viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(viewport->GetWorkPos());
-        ImGui::SetNextWindowSize(viewport->GetWorkSize());
-        ImGui::SetNextWindowViewport(viewport->ID);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-
-        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-
-        if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
-            window_flags |= ImGuiWindowFlags_NoBackground;
-
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-        ImGui::Begin("Mu Dockspace", NULL, window_flags);
-
-        ImGui::PopStyleVar();
-        ImGui::PopStyleVar(2);
-
-        ImGuiIO& io = ImGui::GetIO();
-        if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
-            ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-            ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
-        }
-
-        if (ImGui::BeginMenuBar()) {
-            if (ImGui::BeginMenu("File")) {
-                ImGui::EndMenu();
+                if (ImGui::BeginTabItem(in_editor_files[i].c_str())) {
+                    ImGui::InputTextMultiline("input", in_editor_data[i].begin(), (size_t)in_editor_data[i].size(), ImGui::GetContentRegionAvail(), 
+                                            ImGuiInputTextFlags_CallbackResize, MyResizeCallback, &in_editor_data[i]);
+                    ImGui::EndTabItem();
+                }
             }
-            ImGui::EndMenuBar();
+            ImGui::EndTabBar();
         }
+
+        NewFile();
 
         ImGui::End();
+    }
 
-        ImGui::ShowDemoWindow();
+    void EditorLayer::MenuEventCall(MenuEvent menu_event) {
+        if (menu_event == MenuEvent::NEW) {
+            creating_new_file = true;
+            in_editor_files.push_back(std::string());
+
+            in_editor_data.push_back(ImVector<char>());
+            in_editor_data.back().push_back(0);
+        }
+    }
+
+    void EditorLayer::NewFile() {
+        if (creating_new_file) {
+            ImGui::OpenPopup("New File");
+            if (ImGui::BeginPopupModal("New File", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
+                ImGui::InputText("Name", (char*) in_editor_files.back().data(), MAX_FILENAME_LEN);
+                if (ImGui::Button("Enter")) {
+                    ImGui::CloseCurrentPopup();
+                    creating_new_file = false;
+                }
+                ImGui::EndPopup();
+            }
+        }
     }
 }

@@ -11,7 +11,7 @@ namespace Mu {
         m_instance = this;
 
         m_properties = WindowProperties("Mu", 1280, 720);
-        m_window = Window::CreateGlfwWindow(m_properties, BIND_EVENT(OnEvent));
+        m_window = Window::CreateGlfwWindow(m_properties, BIND_FN(OnEvent));
 
         RendererCommands::Initialize();
 
@@ -53,18 +53,22 @@ namespace Mu {
         }
     }
 
+    void Application::Quit() {
+		m_window->Quit();
+    }
+
     void Application::OnEvent(Event& event) {
 		EventDispatcher dispatcher(&event);
 
 		for (auto it = layers.rbegin(); it != layers.rend(); ++it)
 			(*it)->UserDefEvent(event);
 
-		dispatcher.Dispatch<QuitEvent>(BIND_EVENT(OnClose));
-		dispatcher.Dispatch<ResizeEvent>(BIND_EVENT(OnResize));
+		dispatcher.Dispatch<QuitEvent>(BIND_FN(OnClose));
+		dispatcher.Dispatch<ResizeEvent>(BIND_FN(OnResize));
 	}
 
 	void Application::OnClose(const QuitEvent& event) {
-		m_window->Quit();
+		Quit();
 	}
 
 	void Application::OnResize(const ResizeEvent& event) {
