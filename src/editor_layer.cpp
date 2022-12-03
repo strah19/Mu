@@ -1,5 +1,7 @@
 #include "editor_layer.h"
 #include "imgui.h"
+#include <cmath>
+static float Sin(void*, int i) { return sinf(i * 0.1f); }
 
 namespace Mu {
     void EditorLayer::UpdateGui() {
@@ -13,6 +15,7 @@ namespace Mu {
         ImGui::SetNextWindowViewport(viewport->ID);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
         window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
         window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
@@ -20,7 +23,7 @@ namespace Mu {
             window_flags |= ImGuiWindowFlags_NoBackground;
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-        ImGui::Begin("DockSpace Demo", NULL, window_flags);
+        ImGui::Begin("Mu Dockspace", NULL, window_flags);
 
         ImGui::PopStyleVar();
         ImGui::PopStyleVar(2);
@@ -31,9 +34,15 @@ namespace Mu {
             ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
         }
 
+        if (ImGui::BeginMenuBar()) {
+            if (ImGui::BeginMenu("File")) {
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenuBar();
+        }
+
         ImGui::End();
 
-        ImGui::Begin("Test Panel");
-        ImGui::End();
+        ImGui::ShowDemoWindow();
     }
 }

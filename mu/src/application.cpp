@@ -75,11 +75,13 @@ namespace Mu {
 	}
 
     void Application::PushLayer(Layer* layer) {
+        MU_LOG("Created new layer '%s'", layer->GetName().c_str());
 		layers.PushLayer(layer);
 		layer->OnAttach();
 	}
 
 	void Application::PushOverlay(Layer* layer) {
+        MU_LOG("Created new layer '%s'", layer->GetName().c_str());
 		layers.PushOverlay(layer);
 		layer->OnAttach();
 	}

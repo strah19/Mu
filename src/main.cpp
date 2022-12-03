@@ -6,8 +6,6 @@ public:
     Iota() {
      	PushLayer(new Mu::EditorLayer());   
     }
-private:
-
 };
 
 Mu::Application* Mu::CreateApplication() {
