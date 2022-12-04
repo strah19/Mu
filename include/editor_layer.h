@@ -16,10 +16,14 @@ namespace Iota {
         void UpdateGui();
     private:
         void NewFile();
-        std::string new_file_name;
-        std::vector<std::string> in_editor_files;
-        std::vector<ImVector<char>> in_editor_data;
-        bool creating_new_file = false;
+        void CloseFile();
+    private:
+        uint32_t m_selected_document = -1;
+        std::vector<std::string> m_in_editor_files;
+        std::vector<std::string> m_in_editor_data;
+
+        bool m_creating_new_file = false;
+        bool m_closing_file = false;
     };
 }
 
