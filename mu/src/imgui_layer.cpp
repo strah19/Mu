@@ -6,6 +6,7 @@
 
 #include "application.h"
 #include "glfw_window.h"
+#include "log.h"
 
 namespace Mu {
 	ImGuiLayer::ImGuiLayer() : Layer("ImGuiLayer") {
@@ -69,6 +70,7 @@ namespace Mu {
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
+		MU_LOG("ImGui shutdown");
 	}
 	
 	void ImGuiLayer::Begin() {

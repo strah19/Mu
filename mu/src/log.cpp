@@ -1,5 +1,4 @@
 #include "log.h"
-
 #include <ctime>
 
 #define MAX_INPUT_SIZE 512
@@ -60,6 +59,7 @@ namespace Mu {
 
     void InitCommands();
 
+    static File file_log;
     void InitializeLoggingSystem() {
         InitCommands();
     }
@@ -131,6 +131,8 @@ namespace Mu {
             }
 
             printf("%s", output.c_str());
+            if (file_log.IsOpen())
+                file_log.Write((output.back() == '\n') ? output : output + '\n');
             va_end(args);
         }
     }
@@ -159,6 +161,12 @@ namespace Mu {
 
         def_format_good.Initialize("{cG}[{ts}]: {l}{cDef}.\n");
         def_log_good.SetLogFormat(&def_format_good);
+
+        file_log.Open("log.txt");
+    }
+
+	File* GetFileHandler() {
+        return &file_log;
     }
 
     Logger& Logs::GetLogError() { return error_log; }

@@ -18,7 +18,6 @@ namespace Mu {
         void Update();
 
         void PushLayer(Layer* layer);
-		void PushOverlay(Layer* layer);
 
         static Application& Get() { return *m_instance; }
         Window* GetWindow() { return m_window; }

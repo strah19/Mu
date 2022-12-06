@@ -2,36 +2,30 @@
 #include "imgui.h"
 
 namespace Iota {
-    Menu::Menu(MenuCallbackFn menu_callback) : m_menu_callback(menu_callback) { }
+    MenuViewer* MenuViewer::m_instance = nullptr;
 
-    void Menu::DrawMenu() {
+    MenuViewer::MenuViewer() { 
+        m_instance = this;
+    }
+
+    void MenuViewer::DrawMenu() {
         if (ImGui::BeginMenuBar()) {
-            if (ImGui::BeginMenu("File")) {
-                if (ImGui::MenuItem("New File", "Ctrl + N"))
-                    m_menu_callback(MenuEvent::NEW);
-                if (ImGui::MenuItem("Open File", "Ctrl + O"))
-                    m_menu_callback(MenuEvent::OPEN);
-                if (ImGui::BeginMenu("Open Recent")) {
-                    if (ImGui::MenuItem("Clear Recently Opened")) {
-                        
-                    }
+            for (auto& menu : m_menus) {
+                if (ImGui::BeginMenu(menu->name.c_str())) {
+                    DrawMenuItems(menu);
                     ImGui::EndMenu();
                 }
-                if (ImGui::MenuItem("Close"))
-                    m_menu_callback(MenuEvent::CLOSE);
-                if (ImGui::MenuItem("Save", "Ctrl + S")) 
-                    m_menu_callback(MenuEvent::SAVE);
-                if (ImGui::MenuItem("Quit", "Alt + F4")) 
-                    m_menu_callback(MenuEvent::QUIT);
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Edit")) {
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Help")) {
-                ImGui::EndMenu();
             }
             ImGui::EndMenuBar();
+        }
+    }
+
+    void MenuViewer::DrawMenuItems(Menu* menu) {
+        for (auto& menu_item : menu->menu_items) {
+            if (menu_item.menu) 
+                DrawMenuItems(menu_item.menu);
+            if (ImGui::MenuItem(menu_item.name.c_str()) && !menu_item.menu) 
+                menu_item.item_callback();
         }
     }
 }

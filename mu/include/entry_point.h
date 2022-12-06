@@ -11,10 +11,12 @@ int main(int argc, char *argv[]) {
     Mu::Logs::InitializeLoggers();
     
     Mu::Application* application = Mu::CreateApplication();
+    MU_LOG_GOOD("Application Initalized");
 
     application->Run();
 
     delete application;
+    MU_LOG_GOOD("Application closed");
 }
 
 #endif // !ENTRY_POINT_H

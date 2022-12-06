@@ -7,11 +7,9 @@
 namespace Iota {
     class SetupLayer : public Mu::Layer {
     public:
-        SetupLayer(Menu menu) : Mu::Layer("Setup Layer"), m_menu(menu) { }
+        SetupLayer() : Mu::Layer("Setup Layer") { }
 
         void UpdateGui();
-    private:
-        Menu m_menu;
     };
 }
 

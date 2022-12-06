@@ -4,19 +4,38 @@
 #include "mu.h"
 
 namespace Iota {
-    enum MenuEvent{
-        QUIT, OPEN, NEW, CLOSE, SAVE
+    using MenuCallbackFn = std::function<void()>;
+
+    struct Menu;
+    struct MenuItem {
+        std::string name;
+        Menu* menu = nullptr;
+        MenuCallbackFn item_callback;
+
+        MenuItem(const std::string& name, MenuCallbackFn item_callback) : name(name), item_callback(item_callback) { }
+    };
+
+    struct Menu {
+        std::string name;
+        std::vector<MenuItem> menu_items;
+
+        Menu(const std::string& name) : name(name) { }
+        Menu() { }
     };
     
-    using MenuCallbackFn = std::function<void(MenuEvent)>;
-    class Menu {
+    class MenuViewer {
     public:
-        Menu(MenuCallbackFn menu_callback);
+        MenuViewer();
 
+        void AddMenu(Menu* menu) { m_menus.push_back(menu); }
         void DrawMenu();
+        static MenuViewer* GetMenu() { return m_instance; }
     private:
-        MenuCallbackFn m_menu_callback;
-    };
+        void DrawMenuItems(Menu* menu);
+    private:
+        static MenuViewer* m_instance;
+        std::vector<Menu*> m_menus;
+};
 }
 
 #endif // !MENU_H

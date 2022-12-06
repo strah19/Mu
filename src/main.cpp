@@ -2,28 +2,25 @@
 #include "entry_point.h"
 #include "menu.h"
 #include "setup_layer.h"
-
-#define BIND_MENU_FN(fn) std::bind(fn, this, std::placeholders::_1)
+#include "widget_layer.h"
 
 namespace Iota {
     class MuApp : public Mu::Application {
     public:
         MuApp() {
-            setup_layer = new SetupLayer(Menu(BIND_MENU_FN(OnMenuCall)));
+            setup_layer = new SetupLayer();
             editor_layer = new EditorLayer();
+           // widget_layer = new WidgetLayer();
+
             PushLayer(setup_layer);
             PushLayer(editor_layer);
         }
 
-        void OnMenuCall(MenuEvent menu_event) {
-            editor_layer->MenuEventCall(menu_event);
-
-            if (menu_event == MenuEvent::QUIT)
-                Quit();
-        }
     private:
+        MenuViewer menu_viewer;
         SetupLayer* setup_layer;
         EditorLayer* editor_layer;
+        WidgetLayer* widget_layer;
     };
 }
 

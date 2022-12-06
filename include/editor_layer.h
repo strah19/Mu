@@ -7,23 +7,48 @@
 #include "imgui.h"
 
 namespace Iota {
+    struct Document {
+        std::string name;
+        std::string content;
+        Mu::File file;
+        bool edited = false;
+
+        Document() = default;
+        virtual ~Document() { }
+        Document(const std::string& name) : name(name) { }
+    };
+
     class EditorLayer : public Mu::Layer {
     public:
         EditorLayer() : Mu::Layer ("Editor Layer") { }
-        virtual ~EditorLayer() { }
 
-        void MenuEventCall(MenuEvent menu_event);
+        void OnAttach();
+        void OnDetach();
         void UpdateGui();
+
+        void NewFileCallback();
+        void OpenFileCallback();
+        void CloseFileCallback();
+        void SaveFileCallback();
     private:
         void NewFile();
         void CloseFile();
+        void CloseSelectedFile();
+        bool SaveSelectedFile();
+        void NoFile();
+
+        void NewCenterPopup(const char* name);
     private:
         uint32_t m_selected_document = -1;
-        std::vector<std::string> m_in_editor_files;
-        std::vector<std::string> m_in_editor_data;
+
+        std::vector<Document*> m_docs;
+
+        ImFont* code_font = nullptr;
+        Menu m_file_menu;
 
         bool m_creating_new_file = false;
         bool m_closing_file = false;
+        bool m_no_file_to_save = false;
     };
 }
 

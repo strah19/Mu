@@ -7,6 +7,8 @@
 #include <cstdarg>
 #include <sstream>
 
+#include "file.h"
+
 namespace Mu {
 	class LogCommand {
 	public:
@@ -104,6 +106,7 @@ namespace Mu {
 	};
 
 	void InitializeLoggingSystem();
+	File* GetFileHandler();
 
 	class Logs {
 	public:
