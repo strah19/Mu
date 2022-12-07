@@ -14,11 +14,12 @@ namespace Iota {
         m_file_menu.menu_items.push_back(MenuItem("New File", BIND_FN(NewFileCallback)));
         m_file_menu.menu_items.push_back(MenuItem("Open",     BIND_FN(OpenFileCallback)));
         m_file_menu.menu_items.push_back(MenuItem("Close",    BIND_FN(CloseFileCallback)));
-        m_file_menu.menu_items.push_back(MenuItem("Save",     BIND_FN(SaveFileCallback)));
+        m_file_menu.menu_items.push_back(MenuItem("Save",     BIND_FN(SaveFileCallback), "Ctrl+S"));
+        m_file_menu.menu_items.push_back(MenuItem("Quit",     BIND_FN(QuitFileCallback), "Alt+F4"));
 
         MenuViewer::GetMenu()->AddMenu(&m_file_menu);
-
     }
+
     void EditorLayer::UpdateGui() {
         ImGui::Begin("Editor");
 
@@ -87,6 +88,10 @@ namespace Iota {
     void EditorLayer::SaveFileCallback() {
         if (!SaveSelectedFile())
             m_no_file_to_save = true;
+    }
+
+    void EditorLayer::QuitFileCallback() {
+        Mu::Application::Get().Quit();
     }
 
     void EditorLayer::NewCenterPopup(const char* name) {

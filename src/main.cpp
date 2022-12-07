@@ -10,10 +10,11 @@ namespace Iota {
         MuApp() {
             setup_layer = new SetupLayer();
             editor_layer = new EditorLayer();
-           // widget_layer = new WidgetLayer();
+            widget_layer = new WidgetLayer();
 
             PushLayer(setup_layer);
             PushLayer(editor_layer);
+            PushLayer(widget_layer);
         }
 
     private:

@@ -25,17 +25,18 @@ namespace Iota {
         void OnAttach();
         void OnDetach();
         void UpdateGui();
-
-        void NewFileCallback();
-        void OpenFileCallback();
-        void CloseFileCallback();
-        void SaveFileCallback();
     private:
         void NewFile();
         void CloseFile();
         void CloseSelectedFile();
         bool SaveSelectedFile();
         void NoFile();
+
+        void NewFileCallback();
+        void OpenFileCallback();
+        void CloseFileCallback();
+        void SaveFileCallback();
+        void QuitFileCallback();
 
         void NewCenterPopup(const char* name);
     private:

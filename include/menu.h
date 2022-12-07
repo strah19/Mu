@@ -9,10 +9,12 @@ namespace Iota {
     struct Menu;
     struct MenuItem {
         std::string name;
+        std::string shortcut;
         Menu* menu = nullptr;
+        bool select = false;
         MenuCallbackFn item_callback;
 
-        MenuItem(const std::string& name, MenuCallbackFn item_callback) : name(name), item_callback(item_callback) { }
+        MenuItem(const std::string& name, MenuCallbackFn item_callback, const std::string& shortcut = "") : name(name), item_callback(item_callback), shortcut(shortcut) { }
     };
 
     struct Menu {

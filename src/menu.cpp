@@ -24,8 +24,10 @@ namespace Iota {
         for (auto& menu_item : menu->menu_items) {
             if (menu_item.menu) 
                 DrawMenuItems(menu_item.menu);
-            if (ImGui::MenuItem(menu_item.name.c_str()) && !menu_item.menu) 
+            if (ImGui::MenuItem(menu_item.name.c_str(), menu_item.shortcut.c_str(), menu_item.select) && !menu_item.menu) {
+                menu_item.select = !menu_item.select;
                 menu_item.item_callback();
+            }
         }
     }
 }

@@ -105,8 +105,9 @@ namespace Mu {
 		LogFormat* formatter;
 	};
 
+	using LogEntries = std::vector<std::string>;
 	void InitializeLoggingSystem();
-	File* GetFileHandler();
+	LogEntries* GetLogEntries();
 
 	class Logs {
 	public:

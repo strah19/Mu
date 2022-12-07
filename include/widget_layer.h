@@ -4,6 +4,10 @@
 #include "mu.h"
 #include "menu.h"
 
+// Widgets
+#include "logger_widget.h"
+#include "terminal_widget.h"
+
 namespace Iota {
     class WidgetLayer : public Mu::Layer {
     public:
@@ -12,7 +16,11 @@ namespace Iota {
         void OnAttach();
         void Detach();
         void UpdateGui();
-        //void MenuEventCall(MenuEvent menu_event);
+    private:
+        LoggerWidget m_logger;
+        TerminalWidget m_terminal;
+
+        Menu m_view_menu;
     };
 }
 
