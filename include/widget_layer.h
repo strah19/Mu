@@ -5,6 +5,7 @@
 #include "menu.h"
 
 // Widgets
+#include "widget.h"
 #include "logger_widget.h"
 #include "terminal_widget.h"
 
@@ -17,10 +18,7 @@ namespace Iota {
         void Detach();
         void UpdateGui();
     private:
-        LoggerWidget m_logger;
-        TerminalWidget m_terminal;
-
-        Menu m_view_menu;
+        std::vector<Widget*> m_widgets;
     };
 }
 

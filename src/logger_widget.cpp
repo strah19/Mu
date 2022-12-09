@@ -3,14 +3,14 @@
 #include "log.h"
 
 namespace Iota {
-    void LoggerWidget::UpdateGui() {
-        if (m_selected) {
-            ImGui::Begin("Logger");
+    LoggerWidget::LoggerWidget() : Widget("Logger") { }
 
-            for (auto& entry : *Mu::GetLogEntries()) 
-                ImGui::Text("%s", entry.c_str());
+    void LoggerWidget::Update() {
+        ImGui::Begin(m_name.c_str());
 
-            ImGui::End();
-        }
+        for (auto& entry : *Mu::GetLogEntries()) 
+            ImGui::Text("%s", entry.c_str());
+
+        ImGui::End();
     }
 }

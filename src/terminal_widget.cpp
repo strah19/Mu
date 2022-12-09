@@ -2,11 +2,11 @@
 #include "imgui.h"
 
 namespace Iota {
-    void TerminalWidget::UpdateGui() {
-        if (m_selected) {
-            ImGui::Begin("Terminal");
+    TerminalWidget::TerminalWidget() : Widget("Terminal") { }
 
-            ImGui::End();
-        }
+    void TerminalWidget::Update() {
+        ImGui::Begin(m_name.c_str());
+
+        ImGui::End();
     }
 }

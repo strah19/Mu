@@ -51,6 +51,14 @@ namespace Mu {
 		static LogCommand* __stdcall Create() { return new UserLogCommand(); }
 	};
 
+	class LeftLogCommand : public LogCommand {
+	public:
+		LeftLogCommand() { }
+		void RunCommand(va_list& args, const char* input) override;
+		void ProcessArgs(va_list& args) override;
+		static LogCommand* __stdcall Create() { return new LeftLogCommand(); }
+	};
+
 	enum ColorCode {
 		FG_RED = 31,
 		FG_GREEN = 32,

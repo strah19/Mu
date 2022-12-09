@@ -32,6 +32,12 @@ namespace Mu {
 
     void UserLogCommand::ProcessArgs(va_list& args) { }
 
+    void LeftLogCommand::RunCommand(va_list& args, const char* input) {
+
+    }
+
+    void LeftLogCommand::ProcessArgs(va_list& args) { }
+
     const std::pair<std::string, ColorCode> COLORS[] = {
         std::make_pair("{cR}", ColorCode::FG_RED),
         std::make_pair("{cDef}", ColorCode::FG_DEFAULT),
@@ -67,6 +73,7 @@ namespace Mu {
     void InitCommands() {
         COMMANDS["{ts}"] = TimestampLogCommand::Create;
         COMMANDS["{l}"] = UserLogCommand::Create;
+        COMMANDS["{L}"] = LeftLogCommand::Create;
 
         for(auto& color : COLORS)
             COMMANDS[color.first] = ColorLogCommand::Create;
@@ -85,7 +92,7 @@ namespace Mu {
         va_start(args, format);
  
         std::string input = format;
-
+/*
         for (auto& current_command : COMMANDS) {
             std::vector<size_t> positions;
             FindAllOccurances(positions, input, current_command.first);
@@ -106,9 +113,25 @@ namespace Mu {
 
         for (auto& command : commands) 
             command->GetResetingPosition();
-
         output = input;
+*/
 
+        size_t start = 0;
+        for (size_t i = 0; i < input.size(); i++) {
+            if (input[i] == '{') {
+                start = i;
+            }
+            else if (input[i] == '}') {
+                std::string name = input.substr(start, i - start + 1);
+                
+                commands.push_back(COMMANDS.find(name)->second());
+                commands.back()->SetCommand(name);
+                commands.back()->ProcessArgs(args);
+            }
+            else {
+                   
+            }
+        }
         va_end(args);
 	}
 
@@ -120,18 +143,32 @@ namespace Mu {
         if (formatter) {
             va_list args;
             va_start(args, fmt);
-            std::string output = formatter->GetLeftOutput();
-
+            std::string output;
+            std::string log_output;
+/*
             for (auto& command : formatter->GetCommands())
                 command->ResetPosition();
 
             for (auto& command : formatter->GetCommands()) {
                 command->RunCommand(args, fmt);
-                command->AddToOutput(output, formatter->GetCommands());
+                size_t pos = command->GetPosition();
+                size_t size = command->GetCommandOutput().size();
+                
+                output.insert(command->GetPosition(), command->GetCommandOutput());
+                for (auto& command : formatter->GetCommands())
+                    if (pos < command->GetPosition())
+                        command->SetPosition(command->GetPosition() + size);
+
+           }
+           */
+
+            for (auto& command : formatter->GetCommands()) {
+                command->RunCommand(args, fmt);
+                output += command->GetCommandOutput();
             }
 
             printf("%s", output.c_str());
-            log_entries.push_back(output);
+            log_entries.push_back(log_output);
             va_end(args);
         }
     }
@@ -149,16 +186,16 @@ namespace Mu {
     static LogFormat def_format_good;
 
     void Logs::InitializeLoggers() {
-        error_format.Initialize("{cR}Mu error[{ts}]: {l}{cDef}.\n");
+        error_format.Initialize("{cR}Mu error[{ts}]: {l}c{cDef}.\n");
         error_log.SetLogFormat(&error_format);
 
-        warning_format.Initialize("{cY}Mu warning[{ts}]: {l}{cDef}.\n");
+        warning_format.Initialize("{cY}Mu warning[{ts}]: {l}c{cDef}.\n");
         warning_log.SetLogFormat(&warning_format);
 
-        def_format.Initialize("{cDef}[{ts}]: {l}{cDef}.\n");
+        def_format.Initialize("{cDef}[{ts}]: {l}c{cDef}.\n");
         def_log.SetLogFormat(&def_format);
 
-        def_format_good.Initialize("{cG}[{ts}]: {l}{cDef}.\n");
+        def_format_good.Initialize("{cG}[{ts}]: {l}c{cDef}.\n");
         def_log_good.SetLogFormat(&def_format_good);
     }
 

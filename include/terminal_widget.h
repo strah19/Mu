@@ -2,14 +2,13 @@
 #define TERMINAL_WIDGET_H
 
 #include "mu.h"
+#include "widget.h"
 
 namespace Iota {
-    class TerminalWidget {
+    class TerminalWidget : public Widget {
     public:
-        void UpdateGui();
-        void MenuSelected() { m_selected = !m_selected; }
-    private:
-        bool m_selected = false;
+        TerminalWidget();
+        void Update();
     };
 }
 

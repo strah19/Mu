@@ -2,14 +2,13 @@
 #define LOGGER_WIDGET_H
 
 #include "mu.h"
+#include "widget.h"
 
 namespace Iota {
-    class LoggerWidget {
+    class LoggerWidget : public Widget {
     public:
-        void UpdateGui();
-        void MenuSelected() { m_selected = !m_selected; }
-    private:
-        bool m_selected = false;
+        LoggerWidget();
+        virtual void Update();
     };
 }
 
