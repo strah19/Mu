@@ -9,6 +9,8 @@ namespace Iota {
     public:
         LoggerWidget();
         virtual void Update();
+    private:
+        std::string m_input_log;
     };
 }
 

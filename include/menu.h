@@ -29,8 +29,10 @@ namespace Iota {
         MenuViewer();
 
         void AddMenu(Menu* menu) { m_menus.push_back(menu); }
+        void UpdateMenu(Menu* menu);
         void DrawMenu();
         static MenuViewer* GetMenu() { return m_instance; }
+        Menu* GetSpecificMenu(const std::string& name);
     private:
         void DrawMenuItems(Menu* menu);
     private:

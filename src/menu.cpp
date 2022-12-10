@@ -29,4 +29,17 @@ namespace Iota {
             }
         }
     }
+
+    Menu* MenuViewer::GetSpecificMenu(const std::string& name) {
+        for (auto& menu : m_menus) 
+            if (menu->name == name)
+                return menu;
+        return nullptr;
+    }
+
+    void MenuViewer::UpdateMenu(Menu* menu) {
+        for (auto& finder_menu : m_menus) 
+            if (finder_menu->name == menu->name) 
+                finder_menu = menu;
+    }
 }

@@ -4,12 +4,14 @@
 namespace Mu {
     #ifdef MU_PLATFORM_WINDOWS
     #include <windows.h>
+	#include <shlobj.h>
     #include <GLFW/glfw3.h>
     #define GLFW_EXPOSE_NATIVE_WIN32
     #include <GLFW/glfw3native.h>
 
     std::string FileDialogs::Open(const char* filter) {
 		OPENFILENAMEA ofn;
+		
 		CHAR szFile[260] = { 0 };
 		CHAR currentDir[256] = { 0 };
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -17,6 +19,7 @@ namespace Mu {
 		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)Application::Get().GetWindow()->GetNativeWindow());
 		ofn.lpstrFile = szFile;
 		ofn.nMaxFile = sizeof(szFile);
+		
 		if (GetCurrentDirectoryA(256, currentDir))
 			ofn.lpstrInitialDir = currentDir;
 		ofn.lpstrFilter = filter;
@@ -53,6 +56,11 @@ namespace Mu {
 		
 		return std::string();
 	}
+
+	std::string FileDialogs::BrowseFolder(std::string saved_path) {
+		
+	}
+
 
     #endif
 } 

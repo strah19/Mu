@@ -9,6 +9,9 @@ namespace Iota {
     public:
         TerminalWidget();
         void Update();
+    private:
+        std::string m_input = "> ";
+        std::vector<std::string> m_history;
     };
 }
 
