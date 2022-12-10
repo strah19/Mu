@@ -13,15 +13,6 @@ namespace Mu {
 
     void TimestampLogCommand::ProcessArgs(va_list& args) { }
 
-    void LogCommand::AddToOutput(std::string& output, std::vector<LogCommand*>& commands) {
-        size_t pos = GetPosition();
-        size_t size = GetCommandOutput().size();
-        output.insert(GetPosition(), GetCommandOutput());
-        for (auto& command : commands)
-            if (pos < command->GetPosition())
-                command->SetPosition(command->GetPosition() + size);
-    }
-
     void UserLogCommand::RunCommand(va_list& args, const char* input) {
         char buffer[MAX_INPUT_SIZE];
         vsnprintf(buffer, MAX_INPUT_SIZE, input, args);
@@ -31,11 +22,7 @@ namespace Mu {
     }
 
     void UserLogCommand::ProcessArgs(va_list& args) { }
-
-    void LeftLogCommand::RunCommand(va_list& args, const char* input) {
-
-    }
-
+    void LeftLogCommand::RunCommand(va_list& args, const char* input) { }
     void LeftLogCommand::ProcessArgs(va_list& args) { }
 
     const std::pair<std::string, ColorCode> COLORS[] = {
@@ -79,61 +66,65 @@ namespace Mu {
             COMMANDS[color.first] = ColorLogCommand::Create;
     }
 
-    void FindAllOccurances(std::vector<size_t>& vec, std::string data, std::string to_search) {
-        size_t pos = data.find(to_search);
-        while (pos != std::string::npos) {
-            vec.push_back(pos);
-            pos = data.find(to_search, pos + to_search.size());
-        }
-    }
-
     void LogFormat::Initialize(const char* format, ...) {
         va_list args;
         va_start(args, format);
  
         std::string input = format;
-/*
-        for (auto& current_command : COMMANDS) {
-            std::vector<size_t> positions;
-            FindAllOccurances(positions, input, current_command.first);
-            for (auto& position : positions) {
-                commands.push_back(current_command.second());
-                commands.back()->SetCommand(current_command.first);
-                commands.back()->SetPosition(position);
-                commands.back()->ProcessArgs(args);
-            }
-        }
-
-        for (auto& command : commands) {
-            input.erase(command->GetPosition(), command->GetCommand().size());
-            for (auto& pos_test : commands)
-                if (command->GetPosition() < pos_test->GetPosition())
-                    pos_test->SetPosition(pos_test->GetPosition() - command->GetCommand().size());
-        }
-
-        for (auto& command : commands) 
-            command->GetResetingPosition();
-        output = input;
-*/
 
         size_t start = 0;
+        bool in_command = false;
         for (size_t i = 0; i < input.size(); i++) {
             if (input[i] == '{') {
                 start = i;
+                in_command = true;
             }
             else if (input[i] == '}') {
                 std::string name = input.substr(start, i - start + 1);
                 
-                commands.push_back(COMMANDS.find(name)->second());
-                commands.back()->SetCommand(name);
-                commands.back()->ProcessArgs(args);
+                NewCommand(name, args);
+                in_command = false;
             }
-            else {
-                   
+            else if (!in_command) {
+                NewCommand("{L}", args);
+                std::string output;
+                for (size_t j = i; j < input.size(); j++) {
+                    if (input[j] == '{') {
+                        std::string name = LookForCommand(input, j);
+                        if (name != "") 
+                            break;
+                    }
+                    else
+                        output.push_back(input[j]);
+                }
+                i += output.size() - 1;
+                commands.back()->SetCommandOutput(output);
             }
         }
+
         va_end(args);
 	}
+
+    void LogFormat::NewCommand(const std::string& name, va_list& args) {
+        commands.push_back(COMMANDS.find(name)->second());
+        commands.back()->SetCommand(name);
+        commands.back()->ProcessArgs(args);
+    }
+
+    std::string LogFormat::LookForCommand(const std::string& input, size_t index) {
+        size_t start = 0;
+        for (size_t i = index; i < input.size(); i++) {
+            if (input[i] == '{')
+                start = i;
+            else if (input[i] == '}') {
+                std::string name = input.substr(start, i - start + 1);
+                if (COMMANDS.find(name) != COMMANDS.end())
+                    return name;
+                break;
+            }
+        }
+        return "";
+    }
 
     void Logger::SetLogFormat(LogFormat* log_format) {
         formatter = log_format;
@@ -145,26 +136,12 @@ namespace Mu {
             va_start(args, fmt);
             std::string output;
             std::string log_output;
-/*
-            for (auto& command : formatter->GetCommands())
-                command->ResetPosition();
-
-            for (auto& command : formatter->GetCommands()) {
-                command->RunCommand(args, fmt);
-                size_t pos = command->GetPosition();
-                size_t size = command->GetCommandOutput().size();
-                
-                output.insert(command->GetPosition(), command->GetCommandOutput());
-                for (auto& command : formatter->GetCommands())
-                    if (pos < command->GetPosition())
-                        command->SetPosition(command->GetPosition() + size);
-
-           }
-           */
 
             for (auto& command : formatter->GetCommands()) {
                 command->RunCommand(args, fmt);
                 output += command->GetCommandOutput();
+                if (command->GetCommand()[1] != 'c')
+                    log_output += command->GetCommandOutput();
             }
 
             printf("%s", output.c_str());
@@ -186,16 +163,16 @@ namespace Mu {
     static LogFormat def_format_good;
 
     void Logs::InitializeLoggers() {
-        error_format.Initialize("{cR}Mu error[{ts}]: {l}c{cDef}.\n");
+        error_format.Initialize("{cR}Mu error[{ts}]: {l}{cDef}.\n");
         error_log.SetLogFormat(&error_format);
 
-        warning_format.Initialize("{cY}Mu warning[{ts}]: {l}c{cDef}.\n");
+        warning_format.Initialize("{cY}Mu warning[{ts}]: {l}{cDef}.\n");
         warning_log.SetLogFormat(&warning_format);
 
-        def_format.Initialize("{cDef}[{ts}]: {l}c{cDef}.\n");
+        def_format.Initialize("{cDef}[{ts}]: {l}{cDef}.\n");
         def_log.SetLogFormat(&def_format);
 
-        def_format_good.Initialize("{cG}[{ts}]: {l}c{cDef}.\n");
+        def_format_good.Initialize("{cG}[{ts}]: {l}{cDef}.\n");
         def_log_good.SetLogFormat(&def_format_good);
     }
 
