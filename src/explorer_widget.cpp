@@ -1,6 +1,8 @@
 #include "explorer_widget.h"
 #include "menu.h"
 #include "imgui.h"
+#include "log.h"
+#include "project.h"
 
 namespace Iota {
     const char* NO_FOLDER = "No Folder Opened";
@@ -9,6 +11,8 @@ namespace Iota {
     const char* OPEN_FOLDER_MSG = "Opening a folder will close all current files.";
 
     ExplorerWidget::ExplorerWidget() : Widget("Explorer") {
+        Project k;
+
         Menu* file_menu = MenuViewer::GetMenu()->GetSpecificMenu("File");
         if (file_menu) {
             file_menu->menu_items.insert(file_menu->menu_items.end() - 1, MenuItem("Open Folder", BIND_FN(OpenFolderCallback)));
@@ -17,7 +21,12 @@ namespace Iota {
     }
 
     void ExplorerWidget::OpenFolderCallback() {
-        Mu::FileDialogs::BrowseFolder("C:/Users/User");
+        std::string folderpath;
+        folderpath.reserve(256);
+        if (Mu::FileDialogs::BrowseFolder(folderpath.data(), 256, "C:/Users/User"))
+            MU_LOG("Folder path '%s' opened", folderpath.c_str());
+        else
+            MU_LOG("No folder selected in dialog");
     }
 
     void ExplorerWidget::Update() {
@@ -33,7 +42,7 @@ namespace Iota {
             float text_width   = ImGui::CalcTextSize(OPEN_FOLDER_TEXT).x;
             ImGui::SetCursorPosX((window_width - text_width) * 0.5f);
             if (ImGui::Button(OPEN_FOLDER_TEXT)) {
-
+                OpenFolderCallback();
             }
             ImGui::NewLine();
             ImGui::TextWrapped(OPEN_FOLDER_MSG);

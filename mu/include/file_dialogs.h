@@ -4,18 +4,14 @@
 #include "platform.h"
 #include <string>
 
-namespace Mu {
-    #ifdef MU_PLATFORM_WINDOWS
-    
+namespace Mu {    
 	class FileDialogs {
     public:
         static std::string Open(const char* filter);
         static std::string Save(const char* filter);
 	
-        static std::string BrowseFolder(std::string saved_path);
-    };
-
-    #endif
+        static bool BrowseFolder(char* out, int max_size, const char* starting_dir);
+	};
 }
 
 #endif // !FILE_DIALOG_H

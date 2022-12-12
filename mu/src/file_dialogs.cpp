@@ -1,14 +1,17 @@
 #include "file_dialogs.h"
 #include "application.h"
 
-namespace Mu {
-    #ifdef MU_PLATFORM_WINDOWS
-    #include <windows.h>
-	#include <shlobj.h>
-    #include <GLFW/glfw3.h>
-    #define GLFW_EXPOSE_NATIVE_WIN32
-    #include <GLFW/glfw3native.h>
+#ifdef MU_PLATFORM_WINDOWS
+#include <windows.h>      // For common windows data types and function headers
+#include <shlobj.h>
+#include <shobjidl.h>
+#include <GLFW/glfw3.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+#endif
 
+namespace Mu {
+	#ifdef MU_PLATFORM_WINDOWS
     std::string FileDialogs::Open(const char* filter) {
 		OPENFILENAMEA ofn;
 		
@@ -30,7 +33,6 @@ namespace Mu {
 			return ofn.lpstrFile;
 
 		return std::string();
-
 	}
 
 	std::string FileDialogs::Save(const char* filter) {
@@ -57,10 +59,78 @@ namespace Mu {
 		return std::string();
 	}
 
-	std::string FileDialogs::BrowseFolder(std::string saved_path) {
-		
+	static int CALLBACK BrowseCallbackProc(HWND hwnd,UINT uMsg, LPARAM lParam, LPARAM lpData)
+	{
+
+		if(uMsg == BFFM_INITIALIZED)
+		{
+			std::string tmp = (const char *) lpData;
+			//std::cout << "path: " << tmp << std::endl;
+			SendMessage(hwnd, BFFM_SETSELECTION, TRUE, lpData);
+		}
+
+		return 0;
 	}
 
+	bool FileDialogs::BrowseFolder(char* out, int max_size, const char* starting_dir) {
+		bool ret = false;
+		IFileDialog* pfd;
+		if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd))))
+		{
+			if (starting_dir)
+			{
+				PIDLIST_ABSOLUTE pidl;
+				WCHAR wstarting_dir[MAX_PATH];
+				WCHAR* wc = wstarting_dir;
+				for (const char* c = starting_dir; *c && wc - wstarting_dir < MAX_PATH - 1; ++c, ++wc)
+				{
+					*wc = *c == '/' ? '\\' : *c;
+				}
+				*wc = 0;
+
+				HRESULT hresult = ::SHParseDisplayName(wstarting_dir, 0, &pidl, SFGAO_FOLDER, 0);
+				if (SUCCEEDED(hresult))
+				{
+					IShellItem* psi;
+					hresult = ::SHCreateShellItem(NULL, NULL, pidl, &psi);
+					if (SUCCEEDED(hresult))
+					{
+						pfd->SetFolder(psi);
+					}
+					ILFree(pidl);
+				}
+			}
+
+			DWORD dwOptions;
+			if (SUCCEEDED(pfd->GetOptions(&dwOptions)))
+			{
+				pfd->SetOptions(dwOptions | FOS_PICKFOLDERS);
+			}
+			if (SUCCEEDED(pfd->Show(NULL)))
+			{
+				IShellItem* psi;
+				if (SUCCEEDED(pfd->GetResult(&psi)))
+				{
+					WCHAR* tmp;
+					if (SUCCEEDED(psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &tmp)))
+					{
+						char* c = out;
+						while (*tmp && c - out < max_size - 1)
+						{
+							*c = (char)*tmp;
+							++c;
+							++tmp;
+						}
+						*c = '\0';
+						ret = true;
+					}
+					psi->Release();
+				}
+			}
+			pfd->Release();
+		}
+		return ret;
+	}
 
     #endif
 } 

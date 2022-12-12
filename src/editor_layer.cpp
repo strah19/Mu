@@ -7,7 +7,7 @@
 namespace Iota {
     void EditorLayer::OnAttach() {
         ImGuiIO& io = ImGui::GetIO();
-        code_font = io.Fonts->AddFontFromFileTTF("../res/SourceCodePro-Regular.ttf", 16);
+        code_font = io.Fonts->AddFontFromFileTTF("res/SourceCodePro-Regular.ttf", 16);
 
         m_file_menu = Menu("File");
 
@@ -24,24 +24,24 @@ namespace Iota {
         ImGui::Begin("Editor");
 
         if (ImGui::BeginTabBar("editor tab", ImGuiTabBarFlags_Reorderable | ImGuiTabBarFlags_TabListPopupButton | ImGuiTabBarFlags_AutoSelectNewTabs)) {
-            for (int i = 0; i < m_docs.size(); i++) {
-                if (i == m_docs.size() - 1 && m_creating_new_file)
+            for (int i = 0; i < m_editor.DocumentCount(); i++) {
+                if (i == m_editor.DocumentCount() - 1 && m_creating_new_file)
                     break;
-
+                Document* doc = m_editor.GetDocuments()[i];
                 char tabname_buf[MAX_FILENAME_LEN];
-                sprintf(tabname_buf, "%s###%d", m_docs[i]->name.c_str(), i);
+                sprintf(tabname_buf, "%s###%d", doc->name.c_str(), i);
                 if (ImGui::BeginTabItem(tabname_buf)) {
-                    m_selected_document = i;
+                    m_editor.SetSelectedDocument(i);
                     ImGui::PushFont(code_font);
-                    ImGui::InputTextMultiline("input", &m_docs[i]->content, ImGui::GetContentRegionAvail(), ImGuiInputTextFlags_CallbackEdit, [](ImGuiInputTextCallbackData* data) -> int {
+                    ImGui::InputTextMultiline("input", &doc->content, ImGui::GetContentRegionAvail(), ImGuiInputTextFlags_CallbackEdit, [](ImGuiInputTextCallbackData* data) -> int {
                         bool* edited = (bool*)data->UserData;
                         if (data->EventFlag == ImGuiInputTextFlags_CallbackEdit) 
                             *edited = true;
                         return 0;
-                    }, &m_docs[i]->edited);
+                    }, & doc->edited);
 
-                    if (m_docs[i]->edited && m_docs[i]->name.back() != '*')
-                        m_docs[i]->name += '*';
+                    if (doc->edited && doc->name.back() != '*')
+                        doc->name += '*';
 
                     ImGui::PopFont();
                     ImGui::EndTabItem();
@@ -60,25 +60,13 @@ namespace Iota {
         ImGui::End();
     }
 
-    void EditorLayer::OnDetach() {
-        for (auto& doc : m_docs) {
-            delete doc;
-        }
-    }
-
     void EditorLayer::NewFileCallback() {
         m_creating_new_file = true;
-        m_docs.push_back(new Document());
+        m_editor.CreateBlankDocument();
     }
 
     void EditorLayer::OpenFileCallback() {
-        std::string path = Mu::FileDialogs::Open("Mu Environment (*.lua *.cpp)\0*.lua;*.cpp\0");
-        if (!path.empty()) {
-            m_docs.push_back(new Document());
-            m_docs.back()->file.Open(path.c_str());
-            m_docs.back()->content = m_docs.back()->file.Read();
-            m_docs.back()->name = m_docs.back()->file.Path();
-        }
+        m_editor.CreateDocumentFromFile();
     }
 
     void EditorLayer::CloseFileCallback() {
@@ -86,7 +74,7 @@ namespace Iota {
     }
 
     void EditorLayer::SaveFileCallback() {
-        if (!SaveSelectedFile())
+        if (!m_editor.SaveSelectedDocument())
             m_no_file_to_save = true;
     }
 
@@ -103,9 +91,9 @@ namespace Iota {
     void EditorLayer::NewFile() {
         NewCenterPopup("New File");
         if (ImGui::BeginPopupModal("New File", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::InputText("Name", &m_docs.back()->name);
+            ImGui::InputText("Name", &m_editor.GetDocuments().back()->name);
             if (ImGui::Button("Enter")) {
-                if (m_docs.back()->name.size() == 0) 
+                if (m_editor.GetDocuments().back()->name.size() == 0)
                     NewCenterPopup("No Name Given");
                 else {
                     ImGui::CloseCurrentPopup();
@@ -116,7 +104,7 @@ namespace Iota {
             if (ImGui::Button("Cancel")) {
                 ImGui::CloseCurrentPopup();
                 m_creating_new_file = false;
-                m_docs.pop_back();
+                m_editor.PopDocument();
             }
             if (ImGui::BeginPopupModal("No Name Given", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
                 ImGui::PushStyleColor(ImGuiCol_Text, {1.0f, 0.0f, 0.0f, 1.0f});
@@ -132,18 +120,18 @@ namespace Iota {
     }
 
     void EditorLayer::CloseFile() {
-        const char* message_title = (m_selected_document == -1) ? "No File Selected" : "Close File";
-        const char* message = (m_selected_document == -1) ? "No file selected to close." : (m_docs[m_selected_document]->edited) ? "Do you want to save and close this file?" : "Are you sure you want to close this file?";
-        const char* btn_name = (m_selected_document == -1) ? "Back" : "Cancel";
+        const char* message_title = (!m_editor.IsThereSelectedDocument()) ? "No File Selected" : "Close File";
+        const char* message = (!m_editor.IsThereSelectedDocument()) ? "No file selected to close." :
+            (m_editor.SelectedFileEdited()) ? "Do you want to save and close this file?" : "Are you sure you want to close this file?";
+        const char* btn_name = (!m_editor.IsThereSelectedDocument()) ? "Back" : "Cancel";
 
         NewCenterPopup(message_title);
         if (ImGui::BeginPopupModal(message_title, NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
             ImGui::Text(message);
-            if (m_selected_document != -1) {
-                Document* doc = m_docs[m_selected_document];
-                if (doc->edited) {
+            if (m_editor.IsThereSelectedDocument()) {
+                if (m_editor.SelectedFileEdited()) {
                     if (ImGui::Button("Save and Close")) {
-                        if (SaveSelectedFile())
+                        if (m_editor.SaveSelectedDocument())
                             CloseSelectedFile();
                     }
                 }
@@ -162,15 +150,13 @@ namespace Iota {
     }
 
     void EditorLayer::CloseSelectedFile() {
-        delete m_docs[m_selected_document];
-        m_docs.erase(m_docs.begin() + m_selected_document);
-        m_selected_document = -1;
+        m_editor.CloseSelectedDocument();
         ImGui::CloseCurrentPopup();
         m_closing_file = false;
     }
 
     void EditorLayer::NoFile() {
-        if (m_selected_document == -1) {
+        if (!m_editor.IsThereSelectedDocument()) {
             NewCenterPopup("No Selected File");
             if (ImGui::BeginPopupModal("No Selected File", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
                 ImGui::Text("No file selected to save.");
@@ -181,34 +167,5 @@ namespace Iota {
             }
             ImGui::EndPopup();
         }
-    }
-
-    bool EditorLayer::SaveSelectedFile() {
-        bool successful = false;
-
-        if (m_selected_document != -1) {
-            Document* doc = m_docs[m_selected_document];
-            if (doc->file.IsOpen()) {
-                doc->file.Empty();
-                doc->file.Write(doc->content);
-                successful = true;
-            }
-            else {
-                std::string path = Mu::FileDialogs::Save("Mu Environment (*.lua *.cpp)\0*.lua;*.cpp\0");
-                if (!path.empty()) {
-                    doc->file.Open(path.c_str());
-                    doc->file.Empty();
-                    doc->file.Write(doc->content);
-                successful = true;
-                }
-            }
-        }
-
-        if (successful && m_docs[m_selected_document]->edited) {
-            m_docs[m_selected_document]->edited = false;
-            m_docs[m_selected_document]->name.pop_back();
-        }
-
-        return successful;
     }
 }

@@ -20,7 +20,7 @@ namespace Mu {
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-		io.Fonts->AddFontFromFileTTF("../res/Lato-Regular.ttf", 16);
+		io.Fonts->AddFontFromFileTTF("res/Lato-Regular.ttf", 16);
 
 		// TEMPORARY
 		auto& colors = ImGui::GetStyle().Colors;

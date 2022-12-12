@@ -5,31 +5,19 @@
 #include "menu.h"
 #include <vector>
 #include "imgui.h"
+#include "editor.h"
 
 namespace Iota {
-    struct Document {
-        std::string name;
-        std::string content;
-        Mu::File file;
-        bool edited = false;
-
-        Document() = default;
-        virtual ~Document() { }
-        Document(const std::string& name) : name(name) { }
-    };
-
     class EditorLayer : public Mu::Layer {
     public:
         EditorLayer() : Mu::Layer ("Editor Layer") { }
 
         void OnAttach();
-        void OnDetach();
         void UpdateGui();
     private:
         void NewFile();
         void CloseFile();
         void CloseSelectedFile();
-        bool SaveSelectedFile();
         void NoFile();
 
         void NewFileCallback();
@@ -40,10 +28,7 @@ namespace Iota {
 
         void NewCenterPopup(const char* name);
     private:
-        uint32_t m_selected_document = -1;
-
-        std::vector<Document*> m_docs;
-
+        Editor m_editor;
         ImFont* code_font = nullptr;
         Menu m_file_menu;
 
