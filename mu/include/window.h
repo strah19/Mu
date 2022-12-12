@@ -1,6 +1,7 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#include <cstdint>
 #include "event.h"
 
 namespace Mu {
