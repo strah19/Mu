@@ -3,6 +3,7 @@
 
 #include "widget.h"
 #include "mu.h"
+#include "project.h"
 
 namespace Iota {
     class ExplorerWidget : public Widget {
@@ -12,9 +13,9 @@ namespace Iota {
     private:
         void OpenFolderCallback();
     private:
-        std::string m_current_folder_open;
-
         Mu::Texture m_addfile_texture;
+
+        Project m_project;
     };
 }
 

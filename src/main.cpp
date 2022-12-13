@@ -4,8 +4,6 @@
 #include "setup_layer.h"
 #include "widget_layer.h"
 
-#include <filesystem>
-
 namespace Iota {
     class MuApp : public Mu::Application {
     public:
