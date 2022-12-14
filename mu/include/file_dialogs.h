@@ -4,6 +4,8 @@
 #include "platform.h"
 #include <string>
 
+#define MAX_FILENAME_LEN 256
+
 namespace Mu {    
 	class FileDialogs {
     public:

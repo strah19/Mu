@@ -20,10 +20,13 @@ namespace Iota {
 
     void ExplorerWidget::OpenFolderCallback() {
         std::string folderpath;
-        folderpath.reserve(256);
-        if (Mu::FileDialogs::BrowseFolder(folderpath.data(), 256, "C:/Users/User")) {
+        folderpath.reserve(MAX_FILENAME_LEN);
+        if (Mu::FileDialogs::BrowseFolder(folderpath.data(), MAX_FILENAME_LEN, "C:/Users/User")) {
             MU_LOG("Folder path '%s' opened", folderpath.c_str());
-            m_project.InitializeProject(folderpath);
+            if (!m_project.InitializeProject(folderpath.c_str())) 
+                MU_LOG("Failed to initialize project '%s'", folderpath.c_str());
+            else
+                MU_LOG("Initialized project '%s'", folderpath.c_str());
         }
         else
             MU_LOG("No folder selected in dialog");
@@ -48,9 +51,31 @@ namespace Iota {
             ImGui::TextWrapped(OPEN_FOLDER_MSG);
         }
         else {
+            ImGui::TextWrapped(m_project.GetPath().c_str());
+            ImGui::Separator();
 
+            if (ImGui::TreeNode(m_project.GetName().c_str())) {
+                DisplayDirTree(*m_project.GetDirectory());
+                ImGui::TreePop();
+            }
         }
 
         ImGui::End();
+    }
+
+    void ExplorerWidget::DisplayDirTree(const std::filesystem::path& path) {
+        if (std::filesystem::exists(path) && std::filesystem::is_directory(path)) {
+            for (const auto& entry : std::filesystem::directory_iterator(path)) {
+                auto filename = entry.path().filename();
+                if (std::filesystem::is_directory(entry.status())) {
+                    if (ImGui::TreeNode(filename.string().c_str())) {
+                        DisplayDirTree(entry);
+                        ImGui::TreePop();
+                    }
+                }
+                else
+                    ImGui::Text(filename.string().c_str());
+            }
+        }
     }
 }

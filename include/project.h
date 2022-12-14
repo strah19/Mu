@@ -10,8 +10,10 @@ namespace Iota {
 		Project();
 
 		inline void SetName(const std::string& name) { m_name = name; }
-		bool InitializeProject(const std::string& path);
+		bool InitializeProject(const char* path);
+		void CloseProject();
 
+		std::filesystem::path* GetDirectory() { return &m_project_dir; }
 		inline bool const Working() const { return m_working; }
 		inline std::string const GetPath() { return m_path; }
 		inline std::string const GetName() { return m_name; }

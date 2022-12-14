@@ -12,6 +12,8 @@ namespace Iota {
         void Update();
     private:
         void OpenFolderCallback();
+
+        void DisplayDirTree(const std::filesystem::path& path);
     private:
         Mu::Texture m_addfile_texture;
 

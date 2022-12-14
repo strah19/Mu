@@ -10,8 +10,6 @@
 #include <GLFW/glfw3native.h>
 #endif
 
-#define MAX_FILENAME_LEN 256
-
 namespace Mu {
 	#ifdef MU_PLATFORM_WINDOWS
     std::string FileDialogs::Open(const char* filter) {
