@@ -15,7 +15,7 @@ namespace Iota {
 
 		return m_working;
 	}
-
+	
 	void Project::CloseProject() {
 		m_working = false;
 	}

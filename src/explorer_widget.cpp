@@ -10,18 +10,24 @@ namespace Iota {
     const char* OPEN_FOLDER_TEXT = "Open Folder";
     const char* OPEN_FOLDER_MSG = "Opening a folder will close all current files.";
 
-    ExplorerWidget::ExplorerWidget() : Widget("Explorer") {
+    ExplorerWidget::ExplorerWidget(Editor* editor) : Widget("Explorer"), m_editor(editor) {
         Menu* file_menu = MenuViewer::GetMenu()->GetSpecificMenu("File");
         if (file_menu) {
-            file_menu->menu_items.insert(file_menu->menu_items.end() - 1, MenuItem("Open Folder", BIND_FN(OpenFolderCallback)));
+            file_menu->menu_items.insert(file_menu->menu_items.end() - 1, MenuItem("Open Folder",  BIND_FN(OpenFolderCallback)));
+            file_menu->menu_items.insert(file_menu->menu_items.end() - 1, MenuItem("Close Folder", BIND_FN(CloseFolderCallback)));
             MenuViewer::GetMenu()->UpdateMenu(file_menu);
         }
+    }
+
+    void ExplorerWidget::CloseFolderCallback() {
+        m_project.CloseProject();
+        m_editor->CloseFiles();
     }
 
     void ExplorerWidget::OpenFolderCallback() {
         std::string folderpath;
         folderpath.reserve(MAX_FILENAME_LEN);
-        if (Mu::FileDialogs::BrowseFolder(folderpath.data(), MAX_FILENAME_LEN, "C:/Users/User")) {
+        if (Mu::FileDialogs::BrowseFolder(folderpath.data(), MAX_FILENAME_LEN, std::filesystem::current_path().string().c_str())) {
             MU_LOG("Folder path '%s' opened", folderpath.c_str());
             if (!m_project.InitializeProject(folderpath.c_str())) 
                 MU_LOG("Failed to initialize project '%s'", folderpath.c_str());
@@ -56,8 +62,15 @@ namespace Iota {
 
             if (ImGui::TreeNode(m_project.GetName().c_str())) {
                 DisplayDirTree(*m_project.GetDirectory());
+                if (ImGui::BeginPopup("select_popup")) {
+                    if (ImGui::Selectable("Open")) {
+                        m_editor->CreateDocumentFromFile(m_selected_filepath);
+                    }
+                    ImGui::Selectable("Delete");
+                    ImGui::EndPopup();    
+                }
                 ImGui::TreePop();
-            }
+            }  
         }
 
         ImGui::End();
@@ -65,6 +78,7 @@ namespace Iota {
 
     void ExplorerWidget::DisplayDirTree(const std::filesystem::path& path) {
         if (std::filesystem::exists(path) && std::filesystem::is_directory(path)) {
+            size_t entry_index = 0;
             for (const auto& entry : std::filesystem::directory_iterator(path)) {
                 auto filename = entry.path().filename();
                 if (std::filesystem::is_directory(entry.status())) {
@@ -73,8 +87,14 @@ namespace Iota {
                         ImGui::TreePop();
                     }
                 }
-                else
-                    ImGui::Text(filename.string().c_str());
+                else {
+                    ImGui::TreeNodeEx((void*)(intptr_t) entry_index, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, filename.string().c_str());
+                    if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {    
+                        m_selected_filepath = filename.string().c_str();            
+                        ImGui::OpenPopup("select_popup");
+                    }
+                }
+                entry_index++;
             }
         }
     }

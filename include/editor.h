@@ -22,8 +22,10 @@ namespace Iota {
 
         bool SaveSelectedDocument();
         void CloseSelectedDocument();
-        void CreateDocumentFromFile();
+        void CreateDocumentFromFileDialog();
+        void CreateDocumentFromFile(const std::string& path);
         void CreateBlankDocument();
+        void CloseFiles();
 
         inline void PopDocument() { m_docs.pop_back(); }
 
@@ -33,6 +35,7 @@ namespace Iota {
         inline bool SelectedFileEdited() const { return m_docs[m_selected_document]->edited; }
         inline bool IsThereSelectedDocument() const { return (m_selected_document != -1); }
         inline std::vector<Document*> GetDocuments() { return m_docs; }
+        inline Document* GetLatestDocument() { return m_docs.back(); }
     private:
         std::vector<Document*> m_docs;
         uint32_t m_selected_document = -1;

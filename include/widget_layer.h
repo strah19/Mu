@@ -3,6 +3,7 @@
 
 #include "mu.h"
 #include "menu.h"
+#include "editor.h"
 
 // Widgets
 #include "widget.h"
@@ -12,13 +13,15 @@
 namespace Iota {
     class WidgetLayer : public Mu::Layer {
     public:
-        WidgetLayer() : Mu::Layer("Widget Layer") { }
+        WidgetLayer(Editor* editor) : Mu::Layer("Widget Layer"), m_editor(editor) { }
 
         void OnAttach();
         void Detach();
         void UpdateGui();
     private:
         std::vector<Widget*> m_widgets;
+
+        Editor* m_editor;
     };
 }
 

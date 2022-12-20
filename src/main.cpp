@@ -9,8 +9,8 @@ namespace Iota {
     public:
         MuApp() {
             setup_layer = new SetupLayer();
-            editor_layer = new EditorLayer();
-            widget_layer = new WidgetLayer();
+            editor_layer = new EditorLayer(&editor);
+            widget_layer = new WidgetLayer(&editor);
 
             PushLayer(setup_layer);
             PushLayer(editor_layer);
@@ -22,6 +22,7 @@ namespace Iota {
         SetupLayer* setup_layer;
         EditorLayer* editor_layer;
         WidgetLayer* widget_layer;
+        Editor editor;
     };
 }
 

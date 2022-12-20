@@ -24,14 +24,14 @@ namespace Iota {
         ImGui::Begin("Editor");
 
         if (ImGui::BeginTabBar("editor tab", ImGuiTabBarFlags_Reorderable | ImGuiTabBarFlags_TabListPopupButton | ImGuiTabBarFlags_AutoSelectNewTabs)) {
-            for (int i = 0; i < m_editor.DocumentCount(); i++) {
-                if (i == m_editor.DocumentCount() - 1 && m_creating_new_file)
+            for (int i = 0; i < m_editor->DocumentCount(); i++) {
+                if (i == m_editor->DocumentCount() - 1 && m_creating_new_file)
                     break;
-                Document* doc = m_editor.GetDocuments()[i];
+                Document* doc = m_editor->GetDocuments()[i];
                 char tabname_buf[MAX_FILENAME_LEN];
                 sprintf(tabname_buf, "%s###%d", doc->name.c_str(), i);
                 if (ImGui::BeginTabItem(tabname_buf)) {
-                    m_editor.SetSelectedDocument(i);
+                    m_editor->SetSelectedDocument(i);
                     ImGui::PushFont(code_font);
                     ImGui::InputTextMultiline("input", &doc->content, ImGui::GetContentRegionAvail(), ImGuiInputTextFlags_CallbackEdit, [](ImGuiInputTextCallbackData* data) -> int {
                         bool* edited = (bool*)data->UserData;
@@ -62,11 +62,11 @@ namespace Iota {
 
     void EditorLayer::NewFileCallback() {
         m_creating_new_file = true;
-        m_editor.CreateBlankDocument();
+        m_editor->CreateBlankDocument();
     }
 
     void EditorLayer::OpenFileCallback() {
-        m_editor.CreateDocumentFromFile();
+        m_editor->CreateDocumentFromFileDialog();
     }
 
     void EditorLayer::CloseFileCallback() {
@@ -74,7 +74,7 @@ namespace Iota {
     }
 
     void EditorLayer::SaveFileCallback() {
-        if (!m_editor.SaveSelectedDocument())
+        if (!m_editor->SaveSelectedDocument())
             m_no_file_to_save = true;
     }
 
@@ -91,9 +91,9 @@ namespace Iota {
     void EditorLayer::NewFile() {
         NewCenterPopup("New File");
         if (ImGui::BeginPopupModal("New File", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::InputText("Name", &m_editor.GetDocuments().back()->name);
+            ImGui::InputText("Name", &m_editor->GetDocuments().back()->name);
             if (ImGui::Button("Enter")) {
-                if (m_editor.GetDocuments().back()->name.size() == 0)
+                if (m_editor->GetDocuments().back()->name.size() == 0)
                     NewCenterPopup("No Name Given");
                 else {
                     ImGui::CloseCurrentPopup();
@@ -104,7 +104,7 @@ namespace Iota {
             if (ImGui::Button("Cancel")) {
                 ImGui::CloseCurrentPopup();
                 m_creating_new_file = false;
-                m_editor.PopDocument();
+                m_editor->PopDocument();
             }
             if (ImGui::BeginPopupModal("No Name Given", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
                 ImGui::PushStyleColor(ImGuiCol_Text, {1.0f, 0.0f, 0.0f, 1.0f});
@@ -120,18 +120,18 @@ namespace Iota {
     }
 
     void EditorLayer::CloseFile() {
-        const char* message_title = (!m_editor.IsThereSelectedDocument()) ? "No File Selected" : "Close File";
-        const char* message = (!m_editor.IsThereSelectedDocument()) ? "No file selected to close." :
-            (m_editor.SelectedFileEdited()) ? "Do you want to save and close this file?" : "Are you sure you want to close this file?";
-        const char* btn_name = (!m_editor.IsThereSelectedDocument()) ? "Back" : "Cancel";
+        const char* message_title = (!m_editor->IsThereSelectedDocument()) ? "No File Selected" : "Close File";
+        const char* message = (!m_editor->IsThereSelectedDocument()) ? "No file selected to close." :
+            (m_editor->SelectedFileEdited()) ? "Do you want to save and close this file?" : "Are you sure you want to close this file?";
+        const char* btn_name = (!m_editor->IsThereSelectedDocument()) ? "Back" : "Cancel";
 
         NewCenterPopup(message_title);
         if (ImGui::BeginPopupModal(message_title, NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
             ImGui::Text(message);
-            if (m_editor.IsThereSelectedDocument()) {
-                if (m_editor.SelectedFileEdited()) {
+            if (m_editor->IsThereSelectedDocument()) {
+                if (m_editor->SelectedFileEdited()) {
                     if (ImGui::Button("Save and Close")) {
-                        if (m_editor.SaveSelectedDocument())
+                        if (m_editor->SaveSelectedDocument())
                             CloseSelectedFile();
                     }
                 }
@@ -150,13 +150,13 @@ namespace Iota {
     }
 
     void EditorLayer::CloseSelectedFile() {
-        m_editor.CloseSelectedDocument();
+        m_editor->CloseSelectedDocument();
         ImGui::CloseCurrentPopup();
         m_closing_file = false;
     }
 
     void EditorLayer::NoFile() {
-        if (!m_editor.IsThereSelectedDocument()) {
+        if (!m_editor->IsThereSelectedDocument()) {
             NewCenterPopup("No Selected File");
             if (ImGui::BeginPopupModal("No Selected File", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
                 ImGui::Text("No file selected to save.");

@@ -10,7 +10,7 @@
 namespace Iota {
     class EditorLayer : public Mu::Layer {
     public:
-        EditorLayer() : Mu::Layer ("Editor Layer") { }
+        EditorLayer(Editor* editor) : Mu::Layer ("Editor Layer"), m_editor(editor) { }
 
         void OnAttach();
         void UpdateGui();
@@ -28,7 +28,7 @@ namespace Iota {
 
         void NewCenterPopup(const char* name);
     private:
-        Editor m_editor;
+        Editor* m_editor;
         ImFont* code_font = nullptr;
         Menu m_file_menu;
 

@@ -43,17 +43,31 @@ namespace Iota {
         m_selected_document = -1;
 	}
 
-	void Editor::CreateDocumentFromFile() {
+    void Editor::CloseFiles() {
+        size_t start_size = m_docs.size();
+        for (int i = start_size - 1; i >= 0; i--) {
+            SetSelectedDocument(i);
+            CloseSelectedDocument();
+        }
+    }
+
+	void Editor::CreateDocumentFromFileDialog() {
         std::string path = Mu::FileDialogs::Open("Mu Environment (*.lua *.cpp)\0*.lua;*.cpp\0");
+        CreateDocumentFromFile(path);
+	}
+
+    void Editor::CreateDocumentFromFile(const std::string& path) {
         if (!path.empty()) {
             m_docs.push_back(new Document());
             m_docs.back()->file.Open(path.c_str());
             m_docs.back()->content = m_docs.back()->file.Read();
             m_docs.back()->name = m_docs.back()->file.Path();
+            SetSelectedDocument(m_docs.size() - 1);
         }
-	}
+    }
 
     void Editor::CreateBlankDocument() {
         m_docs.push_back(new Document());
+        SetSelectedDocument(m_docs.size() - 1);
     }
 }
