@@ -24,6 +24,7 @@ namespace Iota {
         void OpenFileCallback();
         void CloseFileCallback();
         void SaveFileCallback();
+        void SaveAsFileCallback();
         void QuitFileCallback();
 
         void NewCenterPopup(const char* name);

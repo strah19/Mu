@@ -20,8 +20,10 @@ namespace Iota {
     }
 
     void ExplorerWidget::CloseFolderCallback() {
-        m_project.CloseProject();
-        m_editor->CloseFiles();
+        if (m_project.Working()) {
+            m_project.CloseProject();
+            m_editor->CloseFiles();
+        }
     }
 
     void ExplorerWidget::OpenFolderCallback() {
@@ -93,6 +95,11 @@ namespace Iota {
                         m_selected_filepath = filename.string().c_str();            
                         ImGui::OpenPopup("select_popup");
                     }
+                    if (ImGui::IsMouseDoubleClicked(0) && ImGui::IsItemHovered()) {
+                        m_selected_filepath = filename.string().c_str();            
+                        m_editor->CreateDocumentFromFile(m_selected_filepath);
+                    }
+
                 }
                 entry_index++;
             }

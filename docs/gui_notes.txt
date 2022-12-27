@@ -1,4 +1,15 @@
--https://github.com/soulthreads/imgui-plot
--How to make name be only name from a file path:
+- https://github.com/soulthreads/imgui-plot
+- How to make name be only name from a file path:
     std::string path = m_docs.back()->file.Path();
     m_docs.back()->name = path.substr(path.find_last_of("/\\") + 1);
+
+Gui todo list:                                                                                                               IS DONE
+- Be able to delete files in a project.                                                                                      |     |
+- Add a "save as" function to the editor.                                                                                    |  X  |
+- Be able to double click name in explorer to open.                                                                          |  X  |
+- If closing a project, add a popup for unsaved files. Meaning if even one file is unsaved,                                  |     |
+a popup will occur asking if you would like to save all files in project before closing.                                     |-----|
+- Add save all function to editor + to menu.                                                                                 |     |
+- Add open recent, need to keep track of projects that have been open, probably in a seperate class like ProjectsManager.    |     |
+- Make sure the same file cannot be opened at the same time.                                                                 |  X  |
+                                                                                                                             |-----|

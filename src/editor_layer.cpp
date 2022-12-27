@@ -15,6 +15,7 @@ namespace Iota {
         m_file_menu.menu_items.push_back(MenuItem("Open",     BIND_FN(OpenFileCallback)));
         m_file_menu.menu_items.push_back(MenuItem("Close",    BIND_FN(CloseFileCallback)));
         m_file_menu.menu_items.push_back(MenuItem("Save",     BIND_FN(SaveFileCallback), "Ctrl+S"));
+        m_file_menu.menu_items.push_back(MenuItem("Save As",  BIND_FN(SaveAsFileCallback)));
         m_file_menu.menu_items.push_back(MenuItem("Quit",     BIND_FN(QuitFileCallback), "Alt+F4"));
 
         MenuViewer::GetMenu()->AddMenu(&m_file_menu);
@@ -33,7 +34,7 @@ namespace Iota {
                 if (ImGui::BeginTabItem(tabname_buf)) {
                     m_editor->SetSelectedDocument(i);
                     ImGui::PushFont(code_font);
-                    ImGui::InputTextMultiline("input", &doc->content, ImGui::GetContentRegionAvail(), ImGuiInputTextFlags_CallbackEdit, [](ImGuiInputTextCallbackData* data) -> int {
+                    ImGui::InputTextMultiline("input", &doc->content, ImGui::GetContentRegionAvail(), ImGuiInputTextFlags_CallbackEdit | ImGuiInputTextFlags_AllowTabInput, [](ImGuiInputTextCallbackData* data) -> int {
                         bool* edited = (bool*)data->UserData;
                         if (data->EventFlag == ImGuiInputTextFlags_CallbackEdit) 
                             *edited = true;
@@ -78,6 +79,11 @@ namespace Iota {
             m_no_file_to_save = true;
     }
 
+    void EditorLayer::SaveAsFileCallback() {
+        if (!m_editor->SaveAsSelectedDocument())
+            m_no_file_to_save = true;
+    }
+
     void EditorLayer::QuitFileCallback() {
         Mu::Application::Get().Quit();
     }
@@ -92,7 +98,7 @@ namespace Iota {
         NewCenterPopup("New File");
         if (ImGui::BeginPopupModal("New File", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
             ImGui::InputText("Name", &m_editor->GetDocuments().back()->name);
-            if (ImGui::Button("Enter")) {
+            if (ImGui::Button("Enter")) { 
                 if (m_editor->GetDocuments().back()->name.size() == 0)
                     NewCenterPopup("No Name Given");
                 else {

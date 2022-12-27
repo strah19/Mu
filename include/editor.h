@@ -21,6 +21,7 @@ namespace Iota {
         virtual ~Editor();
 
         bool SaveSelectedDocument();
+        bool SaveAsSelectedDocument();
         void CloseSelectedDocument();
         void CreateDocumentFromFileDialog();
         void CreateDocumentFromFile(const std::string& path);
@@ -36,6 +37,9 @@ namespace Iota {
         inline bool IsThereSelectedDocument() const { return (m_selected_document != -1); }
         inline std::vector<Document*> GetDocuments() { return m_docs; }
         inline Document* GetLatestDocument() { return m_docs.back(); }
+        bool DuplicateFile(const std::string& filepath);
+    private:
+        void ResetEditOnSeletedDocument();
     private:
         std::vector<Document*> m_docs;
         uint32_t m_selected_document = -1;

@@ -9,33 +9,42 @@ namespace Iota {
     }
 
 	bool Editor::SaveSelectedDocument() {
-        bool successful = false;
-
-        if (m_selected_document != -1) {
-            Document* doc = m_docs[m_selected_document];
-            if (doc->file.IsOpen()) {
-                doc->file.Empty();
-                doc->file.Write(doc->content);
-                successful = true;
-            }
-            else {
-                std::string path = Mu::FileDialogs::Save("Mu Environment (*.lua *.cpp)\0*.lua;*.cpp\0");
-                if (!path.empty()) {
-                    doc->file.Open(path.c_str());
-                    doc->file.Empty();
-                    doc->file.Write(doc->content);
-                    successful = true;
-                }
-            }
+        if (m_selected_document == -1) return false;
+    
+        Document* doc = m_docs[m_selected_document];
+        if (doc->file.IsOpen()) {
+            doc->file.Empty();
+            doc->file.Write(doc->content);
+            ResetEditOnSeletedDocument();
+            return true;
         }
+        else 
+            return SaveAsSelectedDocument();
 
-        if (successful && m_docs[m_selected_document]->edited) {
+        return false;
+	}
+
+    void Editor::ResetEditOnSeletedDocument() {
+        if (m_docs[m_selected_document]->edited) {
             m_docs[m_selected_document]->edited = false;
             m_docs[m_selected_document]->name.pop_back();
         }
+    }
 
-        return successful;
-	}
+    bool Editor::SaveAsSelectedDocument() {
+        if (m_selected_document == -1) return false;
+
+        std::string path = Mu::FileDialogs::Save("Mu Environment (*.lua *.cpp)\0*.lua;*.cpp\0");
+        if (!path.empty()) {
+            Document* doc = m_docs[m_selected_document];
+            doc->file.Open(path.c_str());
+            doc->file.Empty();
+            doc->file.Write(doc->content);
+            ResetEditOnSeletedDocument();
+            return true;
+        }
+        return false;
+    }
 
 	void Editor::CloseSelectedDocument() {
         delete m_docs[m_selected_document];
@@ -58,7 +67,9 @@ namespace Iota {
 
     void Editor::CreateDocumentFromFile(const std::string& path) {
         if (!path.empty()) {
-            m_docs.push_back(new Document());
+            if (DuplicateFile(path)) return;
+
+            CreateBlankDocument();
             m_docs.back()->file.Open(path.c_str());
             m_docs.back()->content = m_docs.back()->file.Read();
             m_docs.back()->name = m_docs.back()->file.Path();
@@ -69,5 +80,11 @@ namespace Iota {
     void Editor::CreateBlankDocument() {
         m_docs.push_back(new Document());
         SetSelectedDocument(m_docs.size() - 1);
+    }
+
+    bool Editor::DuplicateFile(const std::string& filepath) {
+        for (size_t i = 0; i < m_docs.size(); i++) 
+            if (filepath == std::string(m_docs[i]->file.Path())) return true;
+        return false;
     }
 }
