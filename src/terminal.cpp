@@ -63,10 +63,19 @@ namespace Iota {
         for (auto& cmd_arg : command_args) 
             send_args.push_back(CommandArg(cmd_arg.c_str()));
 
-        if (m_input != "history") {
+        if (m_input == "help") {
+            m_output.push_back("Terminal Commands:");
+            for (auto& cmd : gcommands) {
+                m_output.push_back(cmd.name);
+            }
+            return;
+        }
+        else if (m_input != "history") {
             CommandOutput out;
+            bool found = false;
             for (auto& cmd : gcommands) {
                 if (cmd.name == name) {
+                    found = true;
                     if (send_args.size() < cmd.arg_types.size() || (send_args.size() > cmd.arg_types.size() && !cmd.variable)) {
                         m_output.push_back(NUM_ARGS_ERROR);
                         break;
@@ -100,10 +109,16 @@ namespace Iota {
                         }
                     }
 
-                    if (out.error == NO_ERROR)
+                    if (out.error == NO_ERROR) {
                         out = cmd.fn(send_args);
+                    }
                 }
             }
+
+            if (!found)
+                out.error = UNKNOWN_CMD_ERROR;
+
+            FormattedOutput("# %s", m_input.c_str());
             if (out.error == NO_ERROR)
                 m_output.push_back(out.output);
             else

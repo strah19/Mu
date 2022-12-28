@@ -10,8 +10,14 @@ extern "C" {
 namespace Mu {
     class ScriptLoader {
     public:
-        void Initialize();
+        ScriptLoader();
+        ~ScriptLoader();
+
+        int RunLine(const char* line);
+        int RunScript(const char* path);
+        const char* GetError(int error);
     private:
+        lua_State* L;
     };
 }
 

@@ -18,6 +18,7 @@ namespace Mu {
 		void UnBind();
 
 		void SetData(void* data);
+		void* GetData() { return data; }
 
 		uint32_t GetWidth() const { return m_width; }
 		uint32_t GetHeight() const { return m_height; }
@@ -29,6 +30,7 @@ namespace Mu {
 		uint32_t m_height = 0;
 		uint32_t m_internal_format = 0, m_data_format = 0;
 		std::string m_path;
+		void* data = nullptr;
 	};
 }
 

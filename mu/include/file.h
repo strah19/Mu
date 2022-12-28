@@ -14,7 +14,7 @@ namespace Mu {
 
         virtual ~File();
         void Empty();
-        void Close(const char* filepath);
+        void Close();
         void Destroy();
         void Open(const char* filepath);
         std::fstream& FileHandler() { return m_file; }

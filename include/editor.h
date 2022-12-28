@@ -25,6 +25,7 @@ namespace Iota {
         void CloseSelectedDocument();
         void CreateDocumentFromFileDialog();
         void CreateDocumentFromFile(const std::string& path);
+        void CreateDocumentFromFile(const std::string& path, const std::string& name);
         void CreateBlankDocument();
         void CloseFiles();
 

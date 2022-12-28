@@ -68,7 +68,11 @@ namespace Iota {
                     if (ImGui::Selectable("Open")) {
                         m_editor->CreateDocumentFromFile(m_selected_filepath);
                     }
-                    ImGui::Selectable("Delete");
+                    if (ImGui::Selectable("Delete")) {
+                        Mu::File delete_it(m_selected_filepath.c_str());
+                        delete_it.Destroy();
+                        delete_it.Close();
+                    }
                     ImGui::EndPopup();    
                 }
                 ImGui::TreePop();
@@ -92,12 +96,12 @@ namespace Iota {
                 else {
                     ImGui::TreeNodeEx((void*)(intptr_t) entry_index, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, filename.string().c_str());
                     if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {    
-                        m_selected_filepath = filename.string().c_str();            
+                        m_selected_filepath = m_project.GetPath() + "\\" + filename.string().c_str();            
                         ImGui::OpenPopup("select_popup");
                     }
                     if (ImGui::IsMouseDoubleClicked(0) && ImGui::IsItemHovered()) {
-                        m_selected_filepath = filename.string().c_str();            
-                        m_editor->CreateDocumentFromFile(m_selected_filepath);
+                        m_selected_filepath = m_project.GetPath() + "\\" + filename.string().c_str();            
+                        m_editor->CreateDocumentFromFile(m_selected_filepath, m_selected_filepath.substr(m_selected_filepath.find_last_of("/\\") + 1));
                     }
 
                 }

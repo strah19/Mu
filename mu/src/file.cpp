@@ -12,24 +12,24 @@ namespace Mu {
 
     File::~File() {
         if (IsOpen())
-            Close(m_filepath.c_str());
+            Close();
     }
 
     void File::Empty() {
-        Close(m_filepath.c_str());
+        Close();
 
         /* Setting it to the trunc mode will clear the m_file's contents. */
         m_file.open(m_filepath, std::fstream::out | std::fstream::trunc);
     }
 
-    void File::Close(const char* filepath) {
+    void File::Close() {
         m_file.flush();
         m_file.close();
-        MU_LOG("Closed file '%s'", filepath);
+        MU_LOG("Closed file '%s'", m_filepath.c_str());
     }
 
     void File::Destroy() {
-        Close(m_filepath.c_str());
+        Close();
 
         remove(m_filepath.c_str());
     }

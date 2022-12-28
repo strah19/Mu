@@ -6,6 +6,8 @@ namespace Mu {
     public:
         static float GetTime();
     };
+
+    void SetIcon(const char* path);
 }
 
 #endif // !UTILITY_H

@@ -8,6 +8,8 @@ namespace Iota {
     class MuApp : public Mu::Application {
     public:
         MuApp() {
+            Mu::SetIcon("res/icon.png");
+
             setup_layer = new SetupLayer();
             editor_layer = new EditorLayer(&editor);
             widget_layer = new WidgetLayer(&editor);

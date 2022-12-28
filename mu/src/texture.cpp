@@ -22,7 +22,7 @@
 #include <glad/glad.h>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "../libs/std_image/std_image.h"
+#include "stb_image.h"
 
 namespace Mu {
 	void Texture::Init(const char* file_path) {
