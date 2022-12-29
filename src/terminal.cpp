@@ -1,7 +1,7 @@
 #include "terminal.h"
 #include <thread>
 #include <stdarg.h>
-#include "log.h"
+#include "mu.h"
 
 namespace Iota {
     std::vector<Command> gcommands;
@@ -26,8 +26,17 @@ namespace Iota {
         return output;
     }
 
+    CommandOutput lua_cmd(const std::vector<CommandArg>& args) {
+        CommandOutput output;
+        Mu::ScriptLoader script;
+        const char* error = script.GetError(script.RunScript(args[0].str));
+        output.output = (error) ? error : "success";
+        return output;
+    }
+
     Terminal::Terminal() {
         GlobalCommands::AddCommand(Command("echo", echo_cmd));
+        GlobalCommands::AddCommand(Command("lua",  { { CommandType::STR } }, lua_cmd));
         GlobalCommands::AddCommand(Command("add", { { CommandType::NUM }, { CommandType::NUM } }, add_cmd, CommandType::NUM));
     }
 

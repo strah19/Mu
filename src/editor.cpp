@@ -12,9 +12,10 @@ namespace Iota {
         if (m_selected_document == -1) return false;
     
         Document* doc = m_docs[m_selected_document];
-        if (doc->file.IsOpen()) {
+        if (doc->file.Path()) {
             doc->file.Empty();
             doc->file.Write(doc->content);
+            doc->file.Close();
             ResetEditOnSeletedDocument();
             return true;
         }
@@ -41,6 +42,7 @@ namespace Iota {
             doc->name = path.substr(path.find_last_of("/\\") + 1);
             doc->file.Empty();
             doc->file.Write(doc->content);
+            doc->file.Close();
             ResetEditOnSeletedDocument();
             return true;
         }
