@@ -9,14 +9,14 @@
 namespace Mu {
     class File {
     public:
-        File(const char* filepath);
+        File(const std::string& filepath);
         File();
 
         virtual ~File();
         void Empty();
         void Close();
         void Destroy();
-        void Open(const char* filepath);
+        void Open(const std::string& filepath);
         std::fstream& FileHandler() { return m_file; }
 
         bool IsOpen();
@@ -26,7 +26,7 @@ namespace Mu {
         void Location(const uint32_t read_location);
         std::streamoff Size();
         bool IsEmpty();
-        const char* Path();
+        std::string Path();
 
         uint64_t LineCount();
         uint64_t CharacterCount();

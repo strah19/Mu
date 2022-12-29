@@ -7,5 +7,6 @@
 #include "texture.h"
 #include "utility.h"
 #include "script_handler.h"
+#include "log.h"
 
 #endif // !MU_H

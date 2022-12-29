@@ -15,9 +15,18 @@ namespace Iota {
         void OnAttach();
         void UpdateGui();
     private:
-        void NewFile();
-        void CloseFile();
+        void InitializeFileMenu();
+        void InitializeEditorFont();
+
+        void DrawTabBar();
+        void DrawTab(uint32_t i);
+
+        void NewFilePopup();
+        void CloseNewFilePopup();
+
+        void CloseFilePopup();
         void CloseSelectedFile();
+        void DrawSaveAndClose();
         void NoFile();
 
         void NewFileCallback();
@@ -28,6 +37,10 @@ namespace Iota {
         void QuitFileCallback();
 
         void NewCenterPopup(const char* name);
+        void UpdateEditStatus(Document* doc);
+        static int SetEditStatus(ImGuiInputTextCallbackData* data);
+
+        std::string MakeTabName(uint32_t i);
     private:
         Editor* m_editor;
         ImFont* code_font = nullptr;

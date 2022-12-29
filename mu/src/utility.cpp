@@ -15,4 +15,8 @@ namespace Mu {
         glfwSetWindowIcon(static_cast<GLFWwindow*>(Application::Get().GetWindow()->GetNativeWindow()), 1, images); 
         stbi_image_free(images[0].pixels);
     }
+
+    std::string GetNameOfPath(const std::string& path) {
+        return path.substr(path.find_last_of("/\\") + 1);;
+    }
 }

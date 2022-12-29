@@ -4,8 +4,8 @@
 #include "log.h"
 
 namespace Mu {
-    File::File(const char* filepath) : m_filepath(filepath) {
-        Open(m_filepath.c_str());
+    File::File(const std::string& filepath) : m_filepath(filepath) {
+        Open(m_filepath);
     }
 
     File::File() : m_filepath() { }
@@ -34,7 +34,7 @@ namespace Mu {
         remove(m_filepath.c_str());
     }
 
-    void File::Open(const char* filepath) {
+    void File::Open(const std::string& filepath) {
         m_file = std::fstream(filepath, std::fstream::in | std::fstream::out | std::fstream::app);
         m_filepath = filepath;
 
@@ -78,8 +78,8 @@ namespace Mu {
         return (Size() == 0) ? true : false;
     }
 
-    const char* File::Path() {
-        return m_filepath.c_str();
+    std::string File::Path() {
+        return m_filepath;
     }
 
     uint64_t File::LineCount() {

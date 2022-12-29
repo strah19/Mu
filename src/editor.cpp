@@ -1,4 +1,5 @@
 #include "editor.h"
+#include "mu.h"
 
 namespace Iota {
 	Editor::Editor() { }
@@ -12,7 +13,8 @@ namespace Iota {
         if (m_selected_document == -1) return false;
     
         Document* doc = m_docs[m_selected_document];
-        if (doc->file.Path()) {
+        if (!doc->file.Path().empty()) {
+            doc->file.Open(doc->file.Path());
             doc->file.Empty();
             doc->file.Write(doc->content);
             doc->file.Close();
@@ -80,7 +82,6 @@ namespace Iota {
             m_docs.back()->file.Open(path.c_str());
             m_docs.back()->content = m_docs.back()->file.Read();
             m_docs.back()->name = name;
-            SetSelectedDocument(m_docs.size() - 1);
         }     
     }
 

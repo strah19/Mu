@@ -4,6 +4,8 @@
 #include "mu.h"
 
 namespace Iota {
+    static const char* FILEMENU = "File";
+    
     using MenuCallbackFn = std::function<void()>;
 
     struct Menu;
@@ -38,7 +40,7 @@ namespace Iota {
     private:
         static MenuViewer* m_instance;
         std::vector<Menu*> m_menus;
-};
+    };
 }
 
 #endif // !MENU_H
