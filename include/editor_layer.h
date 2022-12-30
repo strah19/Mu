@@ -33,18 +33,17 @@ namespace Iota {
         void OpenFileCallback();
         void CloseFileCallback();
         void SaveFileCallback();
-        void SaveAsFileCallback();
         void QuitFileCallback();
 
         void NewCenterPopup(const char* name);
         void UpdateEditStatus(Document* doc);
         static int SetEditStatus(ImGuiInputTextCallbackData* data);
-
-        std::string MakeTabName(uint32_t i);
     private:
         Editor* m_editor;
         ImFont* code_font = nullptr;
         Menu m_file_menu;
+
+        std::string m_newfile_name;
 
         bool m_creating_new_file = false;
         bool m_closing_file = false;

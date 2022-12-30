@@ -66,12 +66,16 @@ namespace Iota {
                 DisplayDirTree(*m_project.GetDirectory());
                 if (ImGui::BeginPopup("select_popup")) {
                     if (ImGui::Selectable("Open")) {
-                        m_editor->CreateDocumentFromFile(m_selected_filepath);
+                        m_editor->OpenFileFromPath(m_selected_filepath);
                     }
                     if (ImGui::Selectable("Delete")) {
-                        Mu::File delete_it(m_selected_filepath.c_str());
-                        delete_it.Destroy();
-                        delete_it.Close();
+                        Mu::File file(m_selected_filepath);
+                        file.Destroy();
+                        int32_t i = m_editor->SearchByPath(m_selected_filepath);
+                        if (i > -1) {
+                            m_editor->SetSelectedDocument(i);
+                            m_editor->CloseSelectedDocument();
+                        }
                     }
                     ImGui::EndPopup();    
                 }
@@ -101,7 +105,7 @@ namespace Iota {
                     }
                     if (ImGui::IsMouseDoubleClicked(0) && ImGui::IsItemHovered()) {
                         m_selected_filepath = m_project.GetPath() + "\\" + filename.string().c_str();            
-                        m_editor->CreateDocumentFromFile(m_selected_filepath, m_selected_filepath.substr(m_selected_filepath.find_last_of("/\\") + 1));
+                        m_editor->OpenFileFromPath(m_selected_filepath);
                     }
 
                 }

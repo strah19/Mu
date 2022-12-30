@@ -16,8 +16,8 @@ namespace Mu {
     }
 
     void File::Empty() {
-        Close();
-
+        m_file.flush();
+        m_file.close();
         /* Setting it to the trunc mode will clear the m_file's contents. */
         m_file.open(m_filepath, std::fstream::out | std::fstream::trunc);
     }

@@ -13,16 +13,14 @@ namespace Iota {
         if (m_selected_document == -1) return false;
     
         Document* doc = m_docs[m_selected_document];
-        if (!doc->file.Path().empty()) {
-            doc->file.Open(doc->file.Path());
-            doc->file.Empty();
-            doc->file.Write(doc->content);
-            doc->file.Close();
+            if (doc->edited) {
+            Mu::File file(doc->path);
+            file.Empty();
+            file.Write(doc->content);
+            file.Close();
             ResetEditOnSeletedDocument();
             return true;
         }
-        else 
-            return SaveAsSelectedDocument();
 
         return false;
 	}
@@ -32,23 +30,6 @@ namespace Iota {
             m_docs[m_selected_document]->edited = false;
             m_docs[m_selected_document]->name.pop_back();
         }
-    }
-
-    bool Editor::SaveAsSelectedDocument() {
-        if (m_selected_document == -1) return false;
-
-        std::string path = Mu::FileDialogs::Save("Mu Environment\0");
-        if (!path.empty()) {
-            Document* doc = m_docs[m_selected_document];
-            doc->file.Open(path.c_str());
-            doc->name = path.substr(path.find_last_of("/\\") + 1);
-            doc->file.Empty();
-            doc->file.Write(doc->content);
-            doc->file.Close();
-            ResetEditOnSeletedDocument();
-            return true;
-        }
-        return false;
     }
 
 	void Editor::CloseSelectedDocument() {
@@ -65,34 +46,54 @@ namespace Iota {
         }
     }
 
-	void Editor::CreateDocumentFromFileDialog() {
-        std::string path = Mu::FileDialogs::Open("Mu Environment (*.lua *.cpp)\0*.lua;*.cpp\0");
-        CreateDocumentFromFile(path);
-	}
-
-    void Editor::CreateDocumentFromFile(const std::string& path) {
-        CreateDocumentFromFile(path, path);
-    }
-
-    void Editor::CreateDocumentFromFile(const std::string& path, const std::string& name) {
-        if (!path.empty()) {
-            if (DuplicateFile(path)) return;
-
-            CreateBlankDocument();
-            m_docs.back()->file.Open(path.c_str());
-            m_docs.back()->content = m_docs.back()->file.Read();
-            m_docs.back()->name = name;
-        }     
-    }
-
-    void Editor::CreateBlankDocument() {
-        m_docs.push_back(new Document());
-        SetSelectedDocument(m_docs.size() - 1);
-    }
-
     bool Editor::DuplicateFile(const std::string& filepath) {
         for (size_t i = 0; i < m_docs.size(); i++) 
-            if (filepath == std::string(m_docs[i]->file.Path())) return true;
+            if (filepath == std::string(m_docs[i]->path)) return true;
         return false;
+    }
+
+    void Editor::CreateNewFileFromDialog(const std::string& name) {
+        std::string path = Mu::FileDialogs::Save("Mu Environment\0");
+        if (path.empty()) return;
+        if (DuplicateFile(path)) return;
+
+        m_docs.push_back(new Document(name, path));
+        m_selected_document = m_docs.size() - 1;
+           
+        Mu::File file(path);
+        file.Close();
+    }
+
+    void Editor::OpenFileFromDialog() {
+        std::string path = Mu::FileDialogs::Open("Mu Environment (*.lua *.cpp)\0*.lua;*.cpp\0");
+        if (path.empty()) return;
+        if (DuplicateFile(path)) return;
+
+        m_docs.push_back(new Document(Mu::GetNameOfPath(path), path));
+        m_selected_document = m_docs.size() - 1;
+
+        Document* doc = m_docs[m_selected_document];
+        Mu::File file(path);
+        doc->content = file.Read();
+        file.Close();
+    }
+
+    void Editor::OpenFileFromPath(const std::string& path) {
+        if (path.empty()) return;
+        if (DuplicateFile(path)) return;
+
+        m_docs.push_back(new Document(Mu::GetNameOfPath(path), path));
+        m_selected_document = m_docs.size() - 1;
+
+        Document* doc = m_docs[m_selected_document];
+        Mu::File file(path);
+        doc->content = file.Read();
+        file.Close();
+    }
+
+    int32_t Editor::SearchByPath(const std::string& path) {
+        for(int32_t i = 0; i < m_docs.size(); i++) 
+            if (m_docs[i]->path == path) return i;
+        return -1;
     }
 }

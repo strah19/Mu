@@ -24,7 +24,6 @@ namespace Iota {
         m_file_menu.menu_items.push_back(MenuItem("Open",     BIND_FN(OpenFileCallback)));
         m_file_menu.menu_items.push_back(MenuItem("Close",    BIND_FN(CloseFileCallback)));
         m_file_menu.menu_items.push_back(MenuItem("Save",     BIND_FN(SaveFileCallback)));
-        m_file_menu.menu_items.push_back(MenuItem("Save As",  BIND_FN(SaveAsFileCallback)));
         m_file_menu.menu_items.push_back(MenuItem("Quit",     BIND_FN(QuitFileCallback)));
 
         MenuViewer::GetMenu()->AddMenu(&m_file_menu);
@@ -54,7 +53,11 @@ namespace Iota {
 
     void EditorLayer::DrawTab(uint32_t i) {
         Document* doc = m_editor->GetDocuments()[i];
-        if (ImGui::BeginTabItem(MakeTabName(i).c_str())) {
+
+        char tabname_buf[MAX_FILENAME_LEN];
+        sprintf(tabname_buf, "%s###%d", doc->name.c_str(), i);
+
+        if (ImGui::BeginTabItem(tabname_buf)) {
             m_editor->SetSelectedDocument(i);
             ImGui::PushFont(code_font);
 
@@ -78,19 +81,13 @@ namespace Iota {
             doc->name.push_back('*');
     }
 
-    std::string EditorLayer::MakeTabName(uint32_t i) {
-        Document* doc = m_editor->GetDocuments()[i];
-        std::string tabname_buf = doc->name.c_str() + std::string("###") + std::to_string(i);
-        return tabname_buf;
-    }
-
     void EditorLayer::NewFileCallback() {
         m_creating_new_file = true;
-        m_editor->CreateBlankDocument();
+        m_newfile_name.clear();
     }
 
     void EditorLayer::OpenFileCallback() {
-        m_editor->CreateDocumentFromFileDialog();
+        m_editor->OpenFileFromDialog();
     }
 
     void EditorLayer::CloseFileCallback() {
@@ -99,11 +96,6 @@ namespace Iota {
 
     void EditorLayer::SaveFileCallback() {
         if (!m_editor->SaveSelectedDocument())
-            m_no_file_to_save = true;
-    }
-
-    void EditorLayer::SaveAsFileCallback() {
-        if (!m_editor->SaveAsSelectedDocument())
             m_no_file_to_save = true;
     }
 
@@ -123,14 +115,14 @@ namespace Iota {
 
         if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape))) {
             CloseNewFilePopup();
-            m_editor->PopDocument();
             return; 
         }
 
-        if (!ImGui::InputText("Name", &m_editor->GetDocuments().back()->name, ImGuiInputTextFlags_EnterReturnsTrue)) return;
+        if (!ImGui::InputText("Name", &m_newfile_name, ImGuiInputTextFlags_EnterReturnsTrue)) return;
 
-        if (m_editor->GetDocuments().back()->name.size() == 0)
-            m_editor->PopDocument();
+        if (!m_newfile_name.empty()) {
+            m_editor->CreateNewFileFromDialog(m_newfile_name);
+        }
 
         CloseNewFilePopup();
 
