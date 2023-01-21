@@ -10,34 +10,42 @@ namespace Iota {
         gcommands.push_back(command);
     }
 
+    CommandOutput ReturnWithError(const char* error) {
+        CommandOutput output;
+        output.error = error;
+        return output;
+    }
+
     CommandOutput echo_cmd(const std::vector<CommandArg>& args) {
         CommandOutput output;
         for (auto& arg : args)
-            output.output += arg.str;
+            output.output += arg.raw;
         return output;
     }
 
     CommandOutput add_cmd(const std::vector<CommandArg>& args) {
         CommandOutput output;
         double num = 0;
-        for (auto& arg : args)
+        for (auto& arg : args) {
+            if (!arg.IsNumber()) return ReturnWithError(NUM_TYPE_ERROR);
             num += arg.num;
+        }
         output.output = std::to_string(num);
         return output;
     }
 
     CommandOutput lua_cmd(const std::vector<CommandArg>& args) {
         CommandOutput output;
-        Mu::ScriptLoader script;
-        const char* error = script.GetError(script.RunScript(args[0].str));
-        output.output = (error) ? error : "success";
+        Mu::Script script;
+        const char* error = script.RunScript(args[0].str);
+        output.output = (error) ? error : "successfully ran lua program.";
         return output;
     }
 
     Terminal::Terminal() {
         GlobalCommands::AddCommand(Command("echo", echo_cmd));
-        GlobalCommands::AddCommand(Command("lua",  { { CommandType::STR } }, lua_cmd));
-        GlobalCommands::AddCommand(Command("add", { { CommandType::NUM }, { CommandType::NUM } }, add_cmd, CommandType::NUM));
+        GlobalCommands::AddCommand(Command("lua",  lua_cmd));
+        GlobalCommands::AddCommand(Command("add",  add_cmd));
     }
 
     bool IsNumber(const std::string & str) {
@@ -58,6 +66,7 @@ namespace Iota {
         std::string input_after_space;
         std::string name;
 
+        // Get the name of the command and the arguents into strings
         bool get_name = false;
         while (getline(iss, input_after_space, ' ')) {
             if (!get_name) {
@@ -68,10 +77,12 @@ namespace Iota {
                 command_args.push_back(input_after_space);
         }
 
+        // Put raw argument strings into CommandArg objects that will be sent to command function
         std::vector<CommandArg> send_args;
         for (auto& cmd_arg : command_args) 
             send_args.push_back(CommandArg(cmd_arg.c_str()));
 
+        // Checks if command is help and exits process
         if (m_input == "help") {
             m_output.push_back("Terminal Commands:");
             for (auto& cmd : gcommands) {
@@ -80,64 +91,37 @@ namespace Iota {
             return;
         }
         else if (m_input != "history") {
-            CommandOutput out;
-            bool found = false;
+            CommandOutput output;
+            output.error = UNKNOWN_CMD_ERROR;
             for (auto& cmd : gcommands) {
                 if (cmd.name == name) {
-                    found = true;
-                    if (send_args.size() < cmd.arg_types.size() || (send_args.size() > cmd.arg_types.size() && !cmd.variable)) {
-                        m_output.push_back(NUM_ARGS_ERROR);
-                        break;
-                    }
+                    output.error = NO_ERROR;
 
-                    for (int i = 0; i < cmd.arg_types.size(); i++) {
-                        if (cmd.arg_types[i] == CommandType::NUM) {
-                            if (IsNumber(send_args[i].str)) {
-                                send_args[i].type = CommandType::NUM;
-                                send_args[i].num = std::stod(send_args[i].str);
-                            }
-                            else {
-                                m_output.push_back(NUM_TYPE_ERROR);
-                                break;
-                            }
+                    for (int i = 0; i < command_args.size(); i++) {
+                        if (IsNumber(send_args[i].str)) {
+                            send_args[i].type = CommandType::NUM;
+                            send_args[i].num = std::stod(send_args[i].str);
+                        }
+                        else {
+                            send_args[i].type = CommandType::STR;
+                            send_args[i].str = send_args[i].str;
                         }
                     }
 
-                    if (cmd.variable) {
-                        for (int i = cmd.arg_types.size(); i < send_args.size(); i++) {
-                            if (cmd.variable_type == CommandType::NUM) {
-                                if (IsNumber(send_args[i].str)) {
-                                    send_args[i].type = CommandType::NUM;
-                                    send_args[i].num = std::stod(send_args[i].str);
-                                }
-                                else {
-                                    m_output.push_back(NUM_TYPE_ERROR);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    if (out.error == NO_ERROR) {
-                        out = cmd.fn(send_args);
-                    }
+                    output = cmd.fn(send_args);
                 }
             }
 
-            if (!found)
-                out.error = UNKNOWN_CMD_ERROR;
-
-            FormattedOutput("# %s", m_input.c_str());
-            if (out.error == NO_ERROR)
-                m_output.push_back(out.output);
+            m_output.push_back(m_input);
+            if (!output.error)
+                m_output.push_back(output.output);
             else
-                m_output.push_back(out.error);
-
-            return;
+                m_output.push_back(output.error);
         }
-
-        for (auto& entry : m_history) 
-            m_output.push_back(entry);  
+        else {
+            for (auto& entry : m_history) 
+                m_output.push_back(entry);  
+        }
     }
 
     void Terminal::FormattedOutput(const char* fmt, ...) {
@@ -148,5 +132,9 @@ namespace Iota {
         buf[MAX_OUTPUT_LEN - 1] = 0;
         va_end(args);
         m_output.push_back(buf);
+    }
+
+    void Terminal::AddToHistory(const std::string& entry) {
+        if (entry != "history") m_history.push_back(entry);
     }
 }

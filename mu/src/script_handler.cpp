@@ -1,24 +1,44 @@
 #include "script_handler.h"
 
 namespace Mu {
-    ScriptLoader::ScriptLoader() {
+    Script::Script() {
         L = luaL_newstate();
         luaL_openlibs(L);
     }
 
-    ScriptLoader::~ScriptLoader() {
+    Script::~Script() {
         lua_close(L);
     }
 
-    int ScriptLoader::RunScript(const char* path) {
-        return luaL_dofile(L, path);
+    const char* Script::RunScript(const char* path) {
+        LuaError status = luaL_dofile(L, path);
+        if (status == LUA_OK) lua_pop(L, lua_gettop(L));
+        return GetError(status);
     }
 
-    int ScriptLoader::RunLine(const char* line) {
-        return luaL_dostring(L, line);
+    const char* Script::RunLine(const char* line) {
+        LuaError status luaL_dostring(L, line);
+        if (status == LUA_OK) lua_pop(L, lua_gettop(L));
+        return GetError(status);
     }
 
-    const char* ScriptLoader::GetError(int error) {
+    void Script::SetInteger(const char* name, int value) {
+        lua_pushinteger(L, value);
+        lua_setglobal(L, name);
+    }
+
+    int Script::GetInteger(const char* name) {
+        lua_getglobal(L, name);
+        int value = lua_tointeger(L, -1);
+        PopStack();
+        return value;
+    }
+
+    const char* Script::GetError(LuaError error) {
         return (error != LUA_OK) ? lua_tostring(L, error) : NULL;
+    }
+
+    void Script::PopStack() {
+        lua_pop(L, 1);
     }
 }

@@ -8,14 +8,21 @@ extern "C" {
 }
 
 namespace Mu {
-    class ScriptLoader {
-    public:
-        ScriptLoader();
-        ~ScriptLoader();
+    using LuaError = int;
 
-        int RunLine(const char* line);
-        int RunScript(const char* path);
-        const char* GetError(int error);
+    class Script {
+    public:
+        Script();
+        ~Script();
+
+        const char* RunLine(const char* line);
+        const char* RunScript(const char* path);
+
+        void SetInteger(const char* name, int value);
+        int GetInteger(const char* name);
+
+        const char* GetError(LuaError error);
+        void PopStack();
     private:
         lua_State* L;
     };

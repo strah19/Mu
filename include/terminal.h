@@ -23,28 +23,24 @@ namespace Iota {
     };
 
     struct CommandArg {
-        CommandArg(const char* str) : str(str), type(CommandType::STR) { }
+        CommandArg(const char* raw) : raw(raw), str(raw), type(CommandType::STR) { }
         union {
             const char* str;
             double num;
-        };  
+        };
+        std::string raw;  
         CommandType type = CommandType::STR;
+
+        bool IsNumber() const {
+            return (type == CommandType::NUM);
+        }
     };
 
     typedef CommandOutput (*CommandFn)(const std::vector<CommandArg>&);
     struct Command {
-        Command(const std::string& name, const std::vector<CommandType>& arg_types, CommandFn fn) : name(name), fn(fn), variable(false), variable_type(CommandType::NONE) { 
-            std::copy(arg_types.begin(), arg_types.end(), back_inserter(this->arg_types));
-        }
-        Command(const std::string& name, CommandFn fn, CommandType variable_type = CommandType::STR) : name(name), fn(fn), variable(true), variable_type(variable_type) { }
-        Command(const std::string& name, const std::vector<CommandType>& arg_types, CommandFn fn, CommandType variable_type) : name(name), fn(fn), variable(true), variable_type(variable_type) { 
-            std::copy(arg_types.begin(), arg_types.end(), back_inserter(this->arg_types));
-        }
+        Command(const std::string& name, CommandFn fn) : name(name), fn(fn) {  }
 
-        bool variable;
         std::string name;
-        CommandType variable_type;
-        std::vector<CommandType> arg_types;
         CommandFn fn;
     };
 
@@ -63,7 +59,7 @@ namespace Iota {
 
         void Execute();
     private:
-        inline void AddToHistory(const std::string& entry) { m_history.push_back(entry); }
+        void AddToHistory(const std::string& entry);
         inline void ClearHistory() { m_history.clear(); }
         inline void ClearOutputBuffer() { m_output.clear(); }
 

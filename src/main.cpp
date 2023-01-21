@@ -8,6 +8,10 @@ namespace Iota {
     class MuApp : public Mu::Application {
     public:
         MuApp() {
+            Mu::Script script;
+            script.SetInteger("a", 12);
+            MU_LOG("%d", script.GetInteger("a"));
+
             Mu::SetIcon("res/icon.png");
 
             setup_layer = new SetupLayer();

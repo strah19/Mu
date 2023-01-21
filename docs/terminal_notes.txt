@@ -1,0 +1,1 @@
+1) parse the command into arguments and get the # of arguments
