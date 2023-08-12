@@ -53,7 +53,7 @@ namespace Iota {
     }
 
     void Editor::CreateNewFileFromDialog(const std::string& name) {
-        std::string path = Mu::FileDialogs::Save("Mu Environment\0");
+        std::string path = Mu::FileDialogs::Save("Mu Environment\0", name.c_str());
         if (path.empty()) return;
         if (DuplicateFile(path)) return;
 

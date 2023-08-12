@@ -35,9 +35,10 @@ namespace Mu {
 		return std::string();
 	}
 
-	std::string FileDialogs::Save(const char* filter) {
+	std::string FileDialogs::Save(const char* filter, const char* name) {
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
+		strcpy(szFile, name);
 		CHAR currentDir[MAX_FILENAME_LEN] = { 0 };
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
 		ofn.lStructSize = sizeof(OPENFILENAME);
